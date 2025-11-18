@@ -91,8 +91,8 @@ class Program
                 .WithDescription("A Discord bot built with Discord.Net")
                 .WithColor(Color.Blue)
                 .AddField("Version", "1.0.0", inline: true)
-                .AddField("Framework", ".NET 8.0", inline: true)
-                .AddField("Library", "Discord.Net 3.16.0", inline: true)
+                .AddField("Framework", ".NET 10.0", inline: true)
+                .AddField("Library", "Discord.Net 3.18.0", inline: true)
                 .WithCurrentTimestamp()
                 .Build();
 
