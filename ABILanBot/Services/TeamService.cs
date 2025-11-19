@@ -1,33 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ABILanBot.Entities;
 using Discord.WebSocket;
 
-namespace WorkLanBot.Services
+namespace ABILanBot.Services
 {
 	public class TeamService
 	{
 		private readonly Random _rng = new();
 
-		public async IReadOnlyList<List<SocketGuildUser>> CreateRandomTeams(
+        public async Task<TeamResult> CreateRandomTeams(
 			IReadOnlyList<SocketGuildUser> members,
 			int teamCount)
 		{
-			if (teamCount < 2)
-			{
-				await RespondAsync($"Need at least 2 teams. Current selected teams {teamCount}."); return;
-			}
+            if (teamCount < 2)
+                return new TeamResult { Success = false, ErrorMessage = $"Need at least 2 teams. Current selected teams {teamCount}." };
 
-			if (members.Count < teamCount)
-			{
-				await RespondAsync($"Not enough members for that many teams. Current members is {members.Count}.");
-			}
+            //if (members.Count < teamCount)
+            //    return new TeamResult { Success = false, ErrorMessage = $"Not enough members for that many teams. Current members is {members.Count}." };
 
-			var shuffled = members.OrderBy(_ => _rng.Next()).ToList();
+
+            var shuffled = members.OrderBy(_ => _rng.Next()).ToList();
 
 			var teams = new List<List<SocketGuildUser>>();
 			for (int i = 0; i < teamCount; i++)
-				teams.Add(new List<SocketGuildUser>());
+                teams.Add([]);
 
 			int index = 0;
 			foreach (var m in shuffled)
@@ -36,7 +31,7 @@ namespace WorkLanBot.Services
 				index = (index + 1) % teamCount;
 			}
 
-			return teams;
+			return new TeamResult(teams);
 		}
 	}
 }

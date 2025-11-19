@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
+﻿using Discord.Rest;
 using Discord.WebSocket;
 
-namespace WorkLanBot.Services
+namespace ABILanBot.Services
 {
 	public class VoiceChannelService
 	{
         //TODO: I want to be able to keep a local cache of created channels so i can move users back to lobby from them.
-        private readonly Dictionary<SocketVoiceChannel, SocketVoiceChannel> _teamChannelCache = new();
+        private readonly Dictionary<string, SocketVoiceChannel> _teamChannelCache = new();
 
         public async Task<IReadOnlyList<SocketVoiceChannel>> EnsureTeamVoiceChannelsExists(
 			SocketGuild guild,
@@ -25,7 +21,7 @@ namespace WorkLanBot.Services
 
                 //need to check if the channel already exists in the cache
 
-				if( _teamChannelCache.TryGetValue(baseChannel, out var cachedChannel))
+				if( _teamChannelCache.TryGetValue(channelName, out var cachedChannel))
 				{
 					result.Add(cachedChannel);
 					continue;
@@ -34,22 +30,27 @@ namespace WorkLanBot.Services
                 var existing = guild.VoiceChannels
 					.FirstOrDefault(c => string.Equals(c.Name, channelName, StringComparison.OrdinalIgnoreCase));
 
-				SocketVoiceChannel vc;
-				if (existing != null)
+				if(existing == default)
 				{
-					vc = existing;
+                    var voiceChannel = await guild.CreateVoiceChannelAsync(channelName, props =>
+                    {
+                        props.CategoryId = baseChannel.CategoryId;
+                        props.Bitrate = baseChannel.Bitrate;
+                        props.UserLimit = baseChannel.UserLimit;
+                    });
+					existing = guild.VoiceChannels.FirstOrDefault(c => c.Id == voiceChannel.Id);
+                }
+				if(existing != default)
+				{
+                    result.Add(existing);
+					_teamChannelCache.TryAdd(channelName, existing);
 				}
 				else
 				{
-					vc = await guild.CreateVoiceChannelAsync(channelName, props =>
-					{
-						props.CategoryId = baseChannel.CategoryId;
-						props.Bitrate = baseChannel.Bitrate;
-						props.UserLimit = baseChannel.UserLimit;
-					});
-				}
-
-				result.Add(vc);
+					//this should never happen but just in case
+					Console.WriteLine($"Failed to create or find voice channel: {channelName}");
+					continue;
+                }
 			}
 
 			return result;
@@ -72,7 +73,6 @@ namespace WorkLanBot.Services
 					}
 					catch (Exception ex)
 					{
-						await RespondAsync($"Failed to move {member.Username}");
 						Console.WriteLine($"Failed to move {member.Username}: {ex.Message}");
 					}
 				}

@@ -1,10 +1,10 @@
-﻿using Discord;
+﻿using ABILanBot.Services;
+using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using WorkLanBot.Services;
 
-namespace WorkLanBot.Modules
+namespace ABILanBot.Modules
 {
 	public class TeamsModule : InteractionModuleBase<SocketInteractionContext>
 	{
@@ -44,17 +44,24 @@ namespace WorkLanBot.Modules
 				.Where(u => !u.IsBot)
 				.ToList();
 
-			if (members.Count < teamCount)
-			{
-				await RespondAsync(
-					$"Not enough people in **{voiceChannel.Name}** for {teamCount} teams (only {members.Count} humans).",
-					ephemeral: true);
+			//if (members.Count < teamCount)
+			//{
+			//	await RespondAsync(
+			//		$"Not enough people in **{voiceChannel.Name}** for {teamCount} teams (only {members.Count} humans).",
+			//		ephemeral: true);
+			//	return;
+			//}
+
+			var teamsResult = await _teams.CreateRandomTeams(members, teamCount);
+
+			if(!teamsResult.Success || teamsResult.Teams == null)
+            {
+				await RespondAsync(teamsResult.ErrorMessage ?? "An unknown error occurred while creating teams.", ephemeral: true);
 				return;
-			}
+            }
 
-			var teams = _teams.CreateRandomTeams(members, teamCount);
-
-			if (moveMembers)
+			var teams = teamsResult.Teams;
+            if (moveMembers)
 			{
 				var vcs = await _voice.EnsureTeamVoiceChannelsExists(Context.Guild, voiceChannel, teamCount);
 				await _voice.MoveTeamsToChannelsAsync(teams, vcs);
@@ -66,7 +73,7 @@ namespace WorkLanBot.Modules
 
 		private Embed BuildTeamsEmbed(
 			SocketVoiceChannel voiceChannel,
-			System.Collections.Generic.IReadOnlyList<System.Collections.Generic.List<SocketGuildUser>> teams,
+			IReadOnlyList<List<SocketGuildUser>> teams,
 			int totalMembers,
 			int teamCount,
 			bool moved)

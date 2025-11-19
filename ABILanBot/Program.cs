@@ -1,8 +1,11 @@
-﻿using Discord;
+﻿using ABILanBot.Modules;
+using ABILanBot.Services;
+using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using WorkLanBot.Modules;
+using System;
 
 namespace ABILanBot;
 
@@ -10,8 +13,10 @@ class Program
 {
 	private DiscordSocketClient? _client;
 	private IConfiguration? _configuration;
+    private InteractionService? _interactionService;
+    private IServiceProvider? _serviceProvider;
 
-	static Task Main(string[] args) => new Program().MainAsync();
+    static Task Main(string[] args) => new Program().MainAsync();
 
 	private async Task MainAsync()
 	{
@@ -37,13 +42,26 @@ class Program
 		services.AddSingleton<VoiceChannelService>();
 		services.AddSingleton<TeamsModule>();
 
-		var serviceProvider = services.BuildServiceProvider();
+		_serviceProvider = services.BuildServiceProvider();
 
 		// Resolve Discord client
-		_client = serviceProvider.GetRequiredService<DiscordSocketClient>();
+		_client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
 
-		// Subscribe to events
-		_client.Log += LogAsync;
+        // Create and configure InteractionService
+        _interactionService = new InteractionService(_client);
+
+        // Register modules
+        await _interactionService.AddModulesAsync(typeof(Program).Assembly, _serviceProvider);
+
+        // Subscribe to interaction events
+        _client.InteractionCreated += async interaction =>
+        {
+            var ctx = new SocketInteractionContext(_client, interaction);
+            await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
+        };
+
+        // Subscribe to events
+        _client.Log += LogAsync;
 		_client.Ready += ReadyAsync;
 		_client.MessageReceived += MessageReceivedAsync;
 
@@ -71,10 +89,16 @@ class Program
 		return Task.CompletedTask;
 	}
 
-	private Task ReadyAsync()
+	private async Task ReadyAsync()
 	{
 		Console.WriteLine($"{_client?.CurrentUser} is connected and ready!");
-		return Task.CompletedTask;
+
+        // Register commands to a specific guild (for testing)
+        // Remove or comment out this line for production
+        // Replace GUILD_ID with your actual guild (server) ID
+        ulong guildId = 1439887410107519087;
+		if(_interactionService != null)
+			await _interactionService.RegisterCommandsToGuildAsync(guildId);
 	}
 
 	private async Task MessageReceivedAsync(SocketMessage message)
