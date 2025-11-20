@@ -40,6 +40,7 @@ class Program
 		// Register your custom services here, for example:
 		services.AddSingleton<TeamService>();
 		services.AddSingleton<VoiceChannelService>();
+		services.AddSingleton<MemberService>();
 		services.AddSingleton<TeamsModule>();
 
 		_serviceProvider = services.BuildServiceProvider();

@@ -10,12 +10,15 @@ namespace ABILanBot.Modules
 	{
 		private readonly TeamService _teams;
 		private readonly VoiceChannelService _voice;
+		private readonly MemberService _members;
 		private readonly IConfiguration _config;
+		private const string GameLobbyChannelName = "GameLobbyChannelName";
 
-		public TeamsModule(TeamService teams, VoiceChannelService voice, IConfiguration config)
+        public TeamsModule(TeamService teams, VoiceChannelService voice, MemberService members, IConfiguration config)
 		{
 			_teams = teams;
 			_voice = voice;
+			_members = members;
 			_config = config;
 		}
 
@@ -28,7 +31,7 @@ namespace ABILanBot.Modules
 				return;
 			}
 
-            var gameLobbyChannelName = _config.GetSection("GameLobbyChannelName").Value;
+            var gameLobbyChannelName = _config.GetSection(GameLobbyChannelName).Value;
 
 			// Get all voice channels in the guild that match the name (case-insensitive)
 			var voiceChannel = Context.Guild.VoiceChannels
@@ -44,14 +47,6 @@ namespace ABILanBot.Modules
 				.Where(u => !u.IsBot)
 				.ToList();
 
-			//if (members.Count < teamCount)
-			//{
-			//	await RespondAsync(
-			//		$"Not enough people in **{voiceChannel.Name}** for {teamCount} teams (only {members.Count} humans).",
-			//		ephemeral: true);
-			//	return;
-			//}
-
 			var teamsResult = await _teams.CreateRandomTeams(members, teamCount);
 
 			if(!teamsResult.Success || teamsResult.Teams == null)
@@ -64,7 +59,7 @@ namespace ABILanBot.Modules
             if (moveMembers)
 			{
 				var vcs = await _voice.EnsureTeamVoiceChannelsExists(Context.Guild, voiceChannel, teamCount);
-				await _voice.MoveTeamsToChannelsAsync(teams, vcs);
+				await _members.MoveTeamsToChannelsAsync(teams, vcs);
 			}
 
 			var embed = BuildTeamsEmbed(voiceChannel, teams, members.Count, teamCount, moveMembers);
@@ -74,11 +69,11 @@ namespace ABILanBot.Modules
 		[SlashCommand("returntolobby", "Move all members from team channels back to the game lobby.")]
 		public async Task ReturnToLobby()
 		{
-			var gameLobbyChannelName = _config.GetSection("GameLobbyChannelName").Value;
+			var gameLobbyChannelName = _config.GetSection(GameLobbyChannelName).Value;
 
 			if (string.IsNullOrEmpty(gameLobbyChannelName))
 			{
-				await RespondAsync("GameLobbyChannelName is not configured.", ephemeral: true);
+				await RespondAsync($"{GameLobbyChannelName} is not configured.", ephemeral: true);
 				return;
 			}
 
@@ -114,30 +109,14 @@ namespace ABILanBot.Modules
 				return;
 			}
 
-			// Move all users back to lobby
-			int successCount = 0;
-			int failCount = 0;
-			foreach (var user in usersToMove)
-			{
-				try
-				{
-					await user.ModifyAsync(props => props.Channel = lobbyChannel);
-					successCount++;
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"Failed to move {user.Username}: {ex.Message}");
-					failCount++;
-				}
-			}
+			// Move all users back to lobby using MemberService
+			await _members.MoveMembersToChannelAsync(usersToMove, lobbyChannel);
 
 			// Build response embed
 			var embed = new EmbedBuilder()
 				.WithTitle("Return to Lobby")
-				.WithDescription(
-					$"✅ Successfully moved **{successCount}** user(s) back to **{gameLobbyChannelName}**." +
-					(failCount > 0 ? $"\n⚠️ Failed to move **{failCount}** user(s)." : ""))
-				.WithColor(failCount > 0 ? Color.Orange : Color.Green)
+				.WithDescription($"✅ Successfully moved **{usersToMove.Count}** user(s) back to **{gameLobbyChannelName}**.")
+				.WithColor(Color.Green)
 				.WithCurrentTimestamp()
 				.Build();
 
