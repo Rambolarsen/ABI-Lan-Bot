@@ -92,15 +92,12 @@ namespace ABILanBot.Modules
 				return;
 			}
 
-			// Find all team channels (channels that start with "{GameLobbyChannelName} - Team")
-			var teamChannelPrefix = $"{gameLobbyChannelName} - Team";
-			var teamChannels = Context.Guild.VoiceChannels
-				.Where(vc => vc.Name.StartsWith(teamChannelPrefix, StringComparison.OrdinalIgnoreCase))
-				.ToList();
+			// Get team channels from the cache
+			var teamChannels = _voice.GetTeamChannelsFromCache(gameLobbyChannelName);
 
 			if (teamChannels.Count == 0)
 			{
-				await RespondAsync($"No team channels found matching pattern **{teamChannelPrefix}**.", ephemeral: true);
+				await RespondAsync($"No team channels found in cache. Use `/maketeams` first to create team channels.", ephemeral: true);
 				return;
 			}
 
