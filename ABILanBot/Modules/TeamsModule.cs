@@ -71,6 +71,79 @@ namespace ABILanBot.Modules
 			await RespondAsync(embed: embed);
 		}
 
+		[SlashCommand("returntolobby", "Move all members from team channels back to the game lobby.")]
+		public async Task ReturnToLobby()
+		{
+			var gameLobbyChannelName = _config.GetSection("GameLobbyChannelName").Value;
+
+			if (string.IsNullOrEmpty(gameLobbyChannelName))
+			{
+				await RespondAsync("GameLobbyChannelName is not configured.", ephemeral: true);
+				return;
+			}
+
+			// Find the lobby voice channel
+			var lobbyChannel = Context.Guild.VoiceChannels
+				.FirstOrDefault(vc => string.Equals(vc.Name, gameLobbyChannelName, StringComparison.OrdinalIgnoreCase));
+
+			if (lobbyChannel == null)
+			{
+				await RespondAsync($"Could not find the **{gameLobbyChannelName}** channel.", ephemeral: true);
+				return;
+			}
+
+			// Get team channels from the cache
+			var teamChannels = _voice.GetTeamChannelsFromCache(gameLobbyChannelName);
+
+			if (teamChannels.Count == 0)
+			{
+				await RespondAsync($"No team channels found in cache. Use `/maketeams` first to create team channels.", ephemeral: true);
+				return;
+			}
+
+			// Collect all users from team channels
+			var usersToMove = new List<SocketGuildUser>();
+			foreach (var channel in teamChannels)
+			{
+				usersToMove.AddRange(channel.Users.Where(u => !u.IsBot));
+			}
+
+			if (usersToMove.Count == 0)
+			{
+				await RespondAsync("No users found in team channels to move.", ephemeral: true);
+				return;
+			}
+
+			// Move all users back to lobby
+			int successCount = 0;
+			int failCount = 0;
+			foreach (var user in usersToMove)
+			{
+				try
+				{
+					await user.ModifyAsync(props => props.Channel = lobbyChannel);
+					successCount++;
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Failed to move {user.Username}: {ex.Message}");
+					failCount++;
+				}
+			}
+
+			// Build response embed
+			var embed = new EmbedBuilder()
+				.WithTitle("Return to Lobby")
+				.WithDescription(
+					$"✅ Successfully moved **{successCount}** user(s) back to **{gameLobbyChannelName}**." +
+					(failCount > 0 ? $"\n⚠️ Failed to move **{failCount}** user(s)." : ""))
+				.WithColor(failCount > 0 ? Color.Orange : Color.Green)
+				.WithCurrentTimestamp()
+				.Build();
+
+			await RespondAsync(embed: embed);
+		}
+
 		private Embed BuildTeamsEmbed(
 			SocketVoiceChannel voiceChannel,
 			IReadOnlyList<List<SocketGuildUser>> teams,

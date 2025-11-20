@@ -78,5 +78,21 @@ namespace ABILanBot.Services
 				}
 			}
 		}
+
+		public IReadOnlyList<SocketVoiceChannel> GetTeamChannelsFromCache(string baseChannelName)
+		{
+			var result = new List<SocketVoiceChannel>();
+			var teamChannelPrefix = $"{baseChannelName} - Team";
+
+			foreach (var kvp in _teamChannelCache)
+			{
+				if (kvp.Key.StartsWith(teamChannelPrefix, StringComparison.OrdinalIgnoreCase))
+				{
+					result.Add(kvp.Value);
+				}
+			}
+
+			return result;
+		}
 	}
 }
