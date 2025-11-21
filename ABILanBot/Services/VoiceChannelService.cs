@@ -70,5 +70,58 @@ namespace ABILanBot.Services
 
             return result;
         }
+
+        public async Task<(int deleted, int skipped)> CleanupTeamChannelsAsync(bool forceDelete = false)
+        {
+            var channelsToDelete = new List<string>();
+            int deletedCount = 0;
+            int skippedCount = 0;
+
+            foreach (var kvp in _teamChannelCache.ToList())
+            {
+                var channel = kvp.Value;
+                
+                // Check if channel still exists
+                if (channel == null)
+                {
+                    _teamChannelCache.Remove(kvp.Key);
+                    continue;
+                }
+
+                // Only delete if channel is empty or force delete is enabled
+                if (forceDelete || channel.ConnectedUsers.Count == 0)
+                {
+                    try
+                    {
+                        await channel.DeleteAsync();
+                        channelsToDelete.Add(kvp.Key);
+                        deletedCount++;
+                    }
+                    catch (Discord.Net.HttpException ex) when (ex.HttpCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        // Channel was already deleted externally, just remove from cache
+                        channelsToDelete.Add(kvp.Key);
+                        Console.WriteLine($"Channel {kvp.Key} was already deleted externally.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to delete channel {kvp.Key}: {ex.Message}");
+                        skippedCount++;
+                    }
+                }
+                else
+                {
+                    skippedCount++;
+                }
+            }
+
+            // Remove deleted channels from cache
+            foreach (var channelName in channelsToDelete)
+            {
+                _teamChannelCache.Remove(channelName);
+            }
+
+            return (deletedCount, skippedCount);
+        }
     }
 }
