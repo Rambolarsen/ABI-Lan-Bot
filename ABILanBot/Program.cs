@@ -42,6 +42,7 @@ class Program
 		services.AddSingleton<VoiceChannelService>();
 		services.AddSingleton<MemberService>();
 		services.AddSingleton<TeamsModule>();
+		services.AddHttpClient<DadJokeService>();
 
 		_serviceProvider = services.BuildServiceProvider();
 
@@ -117,10 +118,15 @@ class Program
 		else if (message.Content.ToLower() == "!help")
 		{
 			await message.Channel.SendMessageAsync(
-				"**ABI Lan Bot Commands:**\n" +
+				"**ABI Lan Bot Commands:**\n\n" +
+				"**Text Commands:**\n" +
 				"• `!ping` - Check if the bot is responsive\n" +
 				"• `!help` - Show this help message\n" +
-				"• `!info` - Display bot information"
+				"• `!info` - Display bot information\n\n" +
+				"**Slash Commands:**\n" +
+				"• `/dadjoke` - Get a random dad joke\n" +
+				"• `/maketeams` - Split people in your voice channel into random teams\n" +
+				"• `/returntolobby` - Move all members from team channels back to the game lobby"
 			);
 		}
 		// Check for info command
