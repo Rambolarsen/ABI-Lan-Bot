@@ -143,14 +143,18 @@ class Program
 		// Check for dadjoke command
 		else if (message.Content.ToLower() == "!dadjoke")
 		{
-			var dadJokeService = _serviceProvider?.GetRequiredService<DadJokeService>();
-			if (dadJokeService != null)
+			try
 			{
-				var joke = await dadJokeService.GetRandomDadJokeAsync();
-				await message.Channel.SendMessageAsync($"😄 {joke}");
+				var dadJokeService = _serviceProvider?.GetRequiredService<DadJokeService>();
+				if (dadJokeService != null)
+				{
+					var joke = await dadJokeService.GetRandomDadJokeAsync();
+					await message.Channel.SendMessageAsync($"😄 {joke}");
+				}
 			}
-			else
+			catch (Exception ex)
 			{
+				Console.WriteLine($"Error handling dadjoke command: {ex.Message}");
 				await message.Channel.SendMessageAsync("Dad joke service is not available right now! 😅");
 			}
 		}
