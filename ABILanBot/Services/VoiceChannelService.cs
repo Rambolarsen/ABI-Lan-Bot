@@ -16,7 +16,7 @@ namespace ABILanBot.Services
 
             for (int i = 0; i < teamCount; i++)
             {
-                var channelName = $"{baseChannel.Name} - Team {i + 1}";
+                var channelName = $"Game room {i + 1}";
 
                 //need to check if the channel already exists in the cache
 
@@ -58,7 +58,7 @@ namespace ABILanBot.Services
         public IReadOnlyList<SocketVoiceChannel> GetTeamChannelsFromCache(string baseChannelName)
         {
             var result = new List<SocketVoiceChannel>();
-            var teamChannelPrefix = $"{baseChannelName} - Team";
+            var teamChannelPrefix = $"Game room";
 
             foreach (var kvp in _teamChannelCache)
             {

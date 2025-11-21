@@ -22,7 +22,7 @@ namespace ABILanBot.Modules
 			_config = config;
 		}
 
-		[SlashCommand("maketeams", "Split people in your voice channel into random teams (and optionally move them).")]
+		[SlashCommand("scrimmage", "Split people in your voice channel into random teams (and optionally move them).")]
 		public async Task MakeTeams(int teamCount = 2, bool moveMembers = true)
 		{
 			if (teamCount < 2)
@@ -100,7 +100,7 @@ namespace ABILanBot.Modules
 			var usersToMove = new List<SocketGuildUser>();
 			foreach (var channel in teamChannels)
 			{
-				usersToMove.AddRange(channel.Users.Where(u => !u.IsBot));
+				usersToMove.AddRange(channel.ConnectedUsers.Where(u => !u.IsBot));
 			}
 
 			if (usersToMove.Count == 0)
