@@ -123,6 +123,37 @@ namespace ABILanBot.Modules
 			await RespondAsync(embed: embed);
 		}
 
+		[SlashCommand("cleanupchannels", "Delete empty team voice channels created by the bot.")]
+		public async Task CleanupChannels(bool forceDelete = false)
+		{
+			// Get team channels from the cache
+			var teamChannels = _voice.GetTeamChannelsFromCache(string.Empty);
+
+			if (teamChannels.Count == 0)
+			{
+				await RespondAsync("No team channels found to clean up.", ephemeral: true);
+				return;
+			}
+
+			// Perform cleanup
+			var (deleted, skipped) = await _voice.CleanupTeamChannelsAsync(forceDelete);
+
+			// Build response embed
+			var description = forceDelete
+				? $"✅ Deleted **{deleted}** team channel(s)."
+				: $"✅ Deleted **{deleted}** empty team channel(s).\n" +
+				  (skipped > 0 ? $"⚠️ Skipped **{skipped}** channel(s) with users still connected." : "");
+
+			var embed = new EmbedBuilder()
+				.WithTitle("Channel Cleanup")
+				.WithDescription(description)
+				.WithColor(deleted > 0 ? Color.Green : Color.Orange)
+				.WithCurrentTimestamp()
+				.Build();
+
+			await RespondAsync(embed: embed);
+		}
+
 		private Embed BuildTeamsEmbed(
 			SocketVoiceChannel voiceChannel,
 			IReadOnlyList<List<SocketGuildUser>> teams,

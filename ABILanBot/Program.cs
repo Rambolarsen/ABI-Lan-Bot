@@ -126,7 +126,8 @@ class Program
 				"**Slash Commands:**\n" +
 				"• `/dadjoke` - Get a random dad joke\n" +
 				"• `/maketeams` - Split people in your voice channel into random teams\n" +
-				"• `/returntolobby` - Move all members from team channels back to the game lobby"
+				"• `/returntolobby` - Move all members from team channels back to the game lobby\n" +
+				"• `/cleanupchannels` - Delete empty team voice channels created by the bot"
 			);
 		}
 		// Check for info command
