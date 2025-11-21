@@ -118,11 +118,15 @@ class Program
 		else if (message.Content.ToLower() == "!help")
 		{
 			await message.Channel.SendMessageAsync(
-				"**ABI Lan Bot Commands:**\n" +
+				"**ABI Lan Bot Commands:**\n\n" +
+				"**Text Commands:**\n" +
 				"• `!ping` - Check if the bot is responsive\n" +
 				"• `!help` - Show this help message\n" +
-				"• `!info` - Display bot information\n" +
-				"• `!dadjoke` - Get a random dad joke"
+				"• `!info` - Display bot information\n\n" +
+				"**Slash Commands:**\n" +
+				"• `/dadjoke` - Get a random dad joke\n" +
+				"• `/maketeams` - Split people in your voice channel into random teams\n" +
+				"• `/returntolobby` - Move all members from team channels back to the game lobby"
 			);
 		}
 		// Check for info command
@@ -139,24 +143,6 @@ class Program
 				.Build();
 
 			await message.Channel.SendMessageAsync(embed: embed);
-		}
-		// Check for dadjoke command
-		else if (message.Content.ToLower() == "!dadjoke")
-		{
-			try
-			{
-				var dadJokeService = _serviceProvider?.GetRequiredService<DadJokeService>();
-				if (dadJokeService != null)
-				{
-					var joke = await dadJokeService.GetRandomDadJokeAsync();
-					await message.Channel.SendMessageAsync($"😄 {joke}");
-				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Error handling dadjoke command: {ex.Message}");
-				await message.Channel.SendMessageAsync("Dad joke service is not available right now! 😅");
-			}
 		}
 	}
 }
