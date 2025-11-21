@@ -15,6 +15,7 @@ class Program
 	private IConfiguration? _configuration;
     private InteractionService? _interactionService;
     private IServiceProvider? _serviceProvider;
+	private DadJokeService? _dadJokeService;
 
     static Task Main(string[] args) => new Program().MainAsync();
 
@@ -42,6 +43,13 @@ class Program
 		services.AddSingleton<VoiceChannelService>();
 		services.AddSingleton<MemberService>();
 		services.AddSingleton<TeamsModule>();
+		services.AddHttpClient();
+		services.AddSingleton<DadJokeService>(provider =>
+		{
+			var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+			var httpClient = httpClientFactory.CreateClient();
+			return new DadJokeService(httpClient);
+		});
 
 		_serviceProvider = services.BuildServiceProvider();
 
@@ -94,6 +102,9 @@ class Program
 	{
 		Console.WriteLine($"{_client?.CurrentUser} is connected and ready!");
 
+		// Get the DadJokeService from the service provider
+		_dadJokeService = _serviceProvider?.GetRequiredService<DadJokeService>();
+
         // Register commands to a specific guild (for testing)
         // Remove or comment out this line for production
         // Replace GUILD_ID with your actual guild (server) ID
@@ -120,7 +131,8 @@ class Program
 				"**ABI Lan Bot Commands:**\n" +
 				"• `!ping` - Check if the bot is responsive\n" +
 				"• `!help` - Show this help message\n" +
-				"• `!info` - Display bot information"
+				"• `!info` - Display bot information\n" +
+				"• `!dadjoke` - Get a random dad joke"
 			);
 		}
 		// Check for info command
@@ -137,6 +149,19 @@ class Program
 				.Build();
 
 			await message.Channel.SendMessageAsync(embed: embed);
+		}
+		// Check for dadjoke command
+		else if (message.Content.ToLower() == "!dadjoke")
+		{
+			if (_dadJokeService != null)
+			{
+				var joke = await _dadJokeService.GetRandomDadJokeAsync();
+				await message.Channel.SendMessageAsync($"😄 {joke}");
+			}
+			else
+			{
+				await message.Channel.SendMessageAsync("Dad joke service is not available right now! 😅");
+			}
 		}
 	}
 }
