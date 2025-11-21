@@ -43,7 +43,7 @@ namespace ABILanBot.Modules
 				return;
 			}
 
-			var members = voiceChannel.Users
+			var members = voiceChannel.ConnectedUsers
 				.Where(u => !u.IsBot)
 				.ToList();
 
