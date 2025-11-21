@@ -124,7 +124,8 @@ namespace ABILanBot.Modules
 		}
 
 		[SlashCommand("cleanupchannels", "Delete empty team voice channels created by the bot.")]
-		public async Task CleanupChannels(bool forceDelete = false)
+		public async Task CleanupChannels(
+			[Summary("force-delete", "If true, deletes channels even if users are connected")] bool forceDelete = false)
 		{
 			// Get team channels from the cache
 			var teamChannels = _voice.GetTeamChannelsFromCache(string.Empty);

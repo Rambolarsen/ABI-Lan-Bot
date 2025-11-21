@@ -97,6 +97,12 @@ namespace ABILanBot.Services
                         channelsToDelete.Add(kvp.Key);
                         deletedCount++;
                     }
+                    catch (Discord.Net.HttpException ex) when (ex.HttpCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        // Channel was already deleted externally, just remove from cache
+                        channelsToDelete.Add(kvp.Key);
+                        Console.WriteLine($"Channel {kvp.Key} was already deleted externally.");
+                    }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Failed to delete channel {kvp.Key}: {ex.Message}");
