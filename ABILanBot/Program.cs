@@ -15,7 +15,6 @@ class Program
 	private IConfiguration? _configuration;
     private InteractionService? _interactionService;
     private IServiceProvider? _serviceProvider;
-	private DadJokeService? _dadJokeService;
 
     static Task Main(string[] args) => new Program().MainAsync();
 
@@ -43,13 +42,7 @@ class Program
 		services.AddSingleton<VoiceChannelService>();
 		services.AddSingleton<MemberService>();
 		services.AddSingleton<TeamsModule>();
-		services.AddHttpClient();
-		services.AddSingleton<DadJokeService>(provider =>
-		{
-			var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
-			var httpClient = httpClientFactory.CreateClient();
-			return new DadJokeService(httpClient);
-		});
+		services.AddHttpClient<DadJokeService>();
 
 		_serviceProvider = services.BuildServiceProvider();
 
@@ -102,9 +95,6 @@ class Program
 	{
 		Console.WriteLine($"{_client?.CurrentUser} is connected and ready!");
 
-		// Get the DadJokeService from the service provider
-		_dadJokeService = _serviceProvider?.GetRequiredService<DadJokeService>();
-
         // Register commands to a specific guild (for testing)
         // Remove or comment out this line for production
         // Replace GUILD_ID with your actual guild (server) ID
@@ -153,9 +143,10 @@ class Program
 		// Check for dadjoke command
 		else if (message.Content.ToLower() == "!dadjoke")
 		{
-			if (_dadJokeService != null)
+			var dadJokeService = _serviceProvider?.GetRequiredService<DadJokeService>();
+			if (dadJokeService != null)
 			{
-				var joke = await _dadJokeService.GetRandomDadJokeAsync();
+				var joke = await dadJokeService.GetRandomDadJokeAsync();
 				await message.Channel.SendMessageAsync($"😄 {joke}");
 			}
 			else

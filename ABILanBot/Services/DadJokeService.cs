@@ -11,16 +11,21 @@ namespace ABILanBot.Services
 		public DadJokeService(HttpClient httpClient)
 		{
 			_httpClient = httpClient;
-			_httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-			_httpClient.DefaultRequestHeaders.Add("User-Agent", "ABI-Lan-Bot (https://github.com/Rambolarsen/ABI-Lan-Bot)");
 		}
 
 		public async Task<string> GetRandomDadJokeAsync()
 		{
 			try
 			{
-				var response = await _httpClient.GetStringAsync(ApiUrl);
-				var jokeResponse = JsonSerializer.Deserialize<DadJokeResponse>(response);
+				using var requestMessage = new HttpRequestMessage(HttpMethod.Get, ApiUrl);
+				requestMessage.Headers.Add("Accept", "application/json");
+				requestMessage.Headers.Add("User-Agent", "ABI-Lan-Bot (https://github.com/Rambolarsen/ABI-Lan-Bot)");
+
+				var response = await _httpClient.SendAsync(requestMessage);
+				response.EnsureSuccessStatusCode();
+
+				var content = await response.Content.ReadAsStringAsync();
+				var jokeResponse = JsonSerializer.Deserialize<DadJokeResponse>(content);
 				
 				return jokeResponse?.Joke ?? "Sorry, couldn't fetch a dad joke right now! 😅";
 			}
