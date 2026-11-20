@@ -57,6 +57,10 @@ jobs:
             $PSNativeCommandUseErrorActionPreference = $false
             & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./start-bot.ps1 -ValidateOnly -SkipRconPrompt
             if ($LASTEXITCODE -ne 0) { throw "Expected validation success; got $LASTEXITCODE" }
+            # Exercise the actual double-click batch entry point and argument forwarding.
+            $launcher = (Resolve-Path 'Start ABI LAN Bot.cmd').Path
+            & cmd.exe /d /s /c ('""' + $launcher + '" -ValidateOnly -SkipRconPrompt"')
+            if ($LASTEXITCODE -ne 0) { throw "Batch launcher validation failed: $LASTEXITCODE" }
 
             @{ Discord = @{ Token = 'ci-test-token-not-real'; GuildId = 'invalid' } } |
               ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $configPath

@@ -76,13 +76,15 @@ try {
         & dotnet run --project $projectPath --configuration Release --no-build --no-restore
         $exitCode = $LASTEXITCODE
 
-        if ($NoRestart) {
-            Write-Host "[ABI LAN Bot] Exited with code $exitCode (restarts disabled)."
-            if ($exitCode -ne 0) { exit $exitCode }
+        if ($exitCode -eq 0) {
+            Write-Host '[ABI LAN Bot] Stopped normally. No restart needed.' -ForegroundColor Green
             break
         }
+        if ($NoRestart) {
+            Stop-WithError "Bot exited with code $exitCode (restarts disabled)."
+        }
 
-        Write-Host "[ABI LAN Bot] Exited with code $exitCode. Retrying in 5 seconds. Ctrl+C cancels." -ForegroundColor Yellow
+        Write-Host "[ABI LAN Bot] Crashed with code $exitCode. Retrying in 5 seconds. Ctrl+C cancels." -ForegroundColor Yellow
         Start-Sleep -Seconds 5
     }
 } finally {
