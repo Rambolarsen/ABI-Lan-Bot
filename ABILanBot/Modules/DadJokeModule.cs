@@ -1,8 +1,11 @@
 using ABILanBot.Services;
+using Discord;
 using Discord.Interactions;
 
 namespace ABILanBot.Modules
 {
+	[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm)]
+	[IntegrationType(ApplicationIntegrationType.GuildInstall)]
 	public class DadJokeModule : InteractionModuleBase<SocketInteractionContext>
 	{
 		private readonly DadJokeService _dadJokeService;

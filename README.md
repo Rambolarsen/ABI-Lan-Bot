@@ -50,7 +50,7 @@ For troubleshooting, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -Fil
 - **!help** — Display command help.
 - **!info** — Display bot and runtime information.
 
-Slash commands register to the configured LAN guild when the bot starts. They are not text commands.
+Administrasjonskommandoer registreres kun på LAN-serveren. /gamepick, /challenge, /lanbingo og /dadjoke registreres globalt og kan brukes i DM til botten.
 
 ## Prerequisites
 
@@ -84,7 +84,7 @@ Slash commands register to the configured LAN guild when the bot starts. They ar
    dotnet run --no-restore
    ```
 
-Guild-specific slash commands register using `Discord:GuildId` in appsettings.json. Updates usually become available shortly after the bot reconnects.
+Guild-only commands register using Discord:GuildId; safe fun commands are global (server and bot DM). Global command changes may take longer to appear. Startup logs command counts and Discord registration errors.
 
 ## Dependencies
 
@@ -101,6 +101,12 @@ Never commit appsettings.json or a real Discord token. The .gitignore excludes l
 ## Development
 
 The bot's slash commands live in Modules, with reusable logic and service registration in Services. `FoodPollService` validates poll options without contacting Discord; `FoodModule` posts native Discord polls. `LanFunService` is stateless and needs no external API. `ABILanBot.Tests` verifies game choices, challenge categories, bingo invariants, Discord intent options and slash command dependency resolution. From the `ABILanBot` directory, run the entire solution test suite with `dotnet test ../ABILanBot.sln` (or run `dotnet test ABILanBot.sln` from the repository root).
+
+### DM og RCON-feilsøking
+
+`/gamepick`, `/challenge`, `/lanbingo` og `/dadjoke` fungerer i serverkanaler og DM til botten for brukere med en felles server. Disse fire kommandoene publiseres globalt. `/cs2`, `/mat`, `/scrimmage`, `/returntolobby` og `/cleanupchannels` forblir kun på den konfigurerte LAN-serveren.
+
+RCON gir nå egne feilmeldinger for manglende passord, avvist passord, nettverksfeil, tidsavbrudd og ugyldige/avbrutte svar. Rå RCON-svar og detaljer fra nettverksunntak sendes aldri til Discord.
 
 ## CS2 server controls (Spillvert)
 
