@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using ABILanBot.Services;
 using Discord;
 using Discord.Interactions;
@@ -23,14 +22,13 @@ public sealed class Cs2Module : InteractionModuleBase<SocketInteractionContext>
 
             // Avoid posting the full status output: it can contain player IDs
             // and connection information. Show only non-sensitive fields.
-            var map = Regex.Match(status, @"(?im)^\s*map\s*:\s*([a-z0-9_]+)");
-            var players = Regex.Match(status, @"(?im)^\s*players\s*:\s*(\d+)\s+humans");
+            var parsed = Cs2StatusParser.Parse(status);
             var lines = new List<string>
             {
                 $"✅ **CS2-serveren svarer på RCON**",
                 $"Adresse: `{_rcon.ServerAddress}`",
-                $"Kart: **{(map.Success ? map.Groups[1].Value : "ukjent")}**",
-                $"Spillere: **{(players.Success ? players.Groups[1].Value : "ukjent")}**"
+                $"Kart: **{(parsed.Map ?? "ukjent")}**",
+                $"Spillere: **{(parsed.HumanPlayers?.ToString() ?? "ukjent")}**"
             };
             await FollowupAsync(string.Join("\n", lines));
         }
