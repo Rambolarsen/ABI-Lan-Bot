@@ -130,22 +130,38 @@ public sealed class Cs2RconService
             throw new IOException("Mottok ikke bekreftet RCON-autentisering.");
 
         var commandId = authId + 1;
+        var sentinelId = authId + 2;
         await WritePacketAsync(stream, commandId, 2, command, timeout.Token);
 
-        // The command can close the connection when it changes maps.
-        // A disconnected response means the request was sent, NOT that the
-        // server has finished loading the new map.
+        // Source RCON does not mark the last packet of a command response.
+        // Queue an empty SERVERDATA_RESPONSE_VALUE request after the command:
+        // the server processes it in order and replies using sentinelId only
+        // after sending all packets belonging to commandId.
+        // This matters for multi-packet responses such as "status".
+        await WritePacketAsync(stream, sentinelId, 0, string.Empty, timeout.Token);
+
+        // Map changes may close the connection before the probe is answered.
+        // Disconnect only means the command was sent, not that it succeeded.
         try
         {
             using var replyTimeout = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token);
             replyTimeout.CancelAfter(TimeSpan.FromSeconds(3));
-            for (var i = 0; i < 8; i++)
+            var output = new StringBuilder();
+            while (true)
             {
                 var reply = await ReadPacketAsync(stream, replyTimeout.Token);
-                if (reply.Id == commandId)
-                    return reply.Body;
+
+                if (reply.Id == sentinelId && reply.Type == 0)
+                    return output.ToString();
+
+                if (reply.Id != commandId || reply.Type != 0)
+                    throw new IOException("Mottok uventet RCON-svar under kommandoen.");
+
+                if (output.Length + reply.Body.Length > 256 * 1024)
+                    throw new IOException("RCON-svaret er for stort.");
+
+                output.Append(reply.Body);
             }
-            throw new IOException("Mottok ikke svar på RCON-kommandoen.");
         }
         catch (EndOfStreamException) when (allowDisconnect)
         {
