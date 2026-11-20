@@ -125,9 +125,12 @@ class Program
 				"• `!info` - Display bot information\n\n" +
 				"**Slash Commands:**\n" +
 				"• `/dadjoke` - Get a random dad joke\n" +
-				"• `/maketeams` - Split people in your voice channel into random teams\n" +
+				"• `/scrimmage` - Split the lobby into random teams\n" +
 				"• `/returntolobby` - Move all members from team channels back to the game lobby\n" +
-				"• `/cleanupchannels` - Delete empty team voice channels created by the bot"
+				"• `/cleanupchannels` - Delete empty team voice channels created by the bot\n" +
+                    "• `/gamepick` - Randomly pick the next game\n" +
+                    "• `/challenge` - Get a LAN party challenge\n" +
+                    "• `/lanbingo` - Generate a LAN bingo card"
 			);
 		}
 		// Check for info command
@@ -138,8 +141,8 @@ class Program
 				.WithDescription("A Discord bot built with Discord.Net")
 				.WithColor(Color.Blue)
 				.AddField("Version", "1.0.0", inline: true)
-				.AddField("Framework", ".NET 10.0", inline: true)
-				.AddField("Library", "Discord.Net 3.18.0", inline: true)
+				.AddField("Framework", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription, inline: true)
+				.AddField("Library", $"Discord.Net {typeof(DiscordSocketClient).Assembly.GetName().Version?.ToString(3)}", inline: true)
 				.WithCurrentTimestamp()
 				.Build();
 
