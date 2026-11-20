@@ -21,7 +21,7 @@ public sealed class FoodPollServiceTests
             poll.Answers.Select(answer => answer.Text).ToArray());
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("lunch", "🥪 What should we eat for lunch?")]
     [DataRow("dinner", "🍕 What should we eat for dinner?")]
     [DataRow("snacks", "🍿 Which snacks should we get?")]
@@ -49,7 +49,7 @@ public sealed class FoodPollServiceTests
         Assert.AreEqual(10, _service.CreatePoll(choices).Answers.Count);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("Pizza")]
     [DataRow("Pizza,pizza")]
     [DataRow("Pizza,")]
@@ -79,7 +79,7 @@ public sealed class FoodPollServiceTests
             () => _service.CreatePoll(new string('x', 1001)));
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(0)]
     [DataRow(-1)]
     [DataRow(25)]
