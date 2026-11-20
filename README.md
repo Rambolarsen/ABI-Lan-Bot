@@ -2,6 +2,23 @@
 
 A Discord LAN party bot built with .NET 10 LTS and Discord.Net. It creates randomized teams and makes game night a little more chaotic.
 
+## LAN day on Windows
+
+Run the bot only during LAN events. No Docker, Windows service or VPS required.
+
+1. Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) on your personal Windows PC.
+2. Clone or update the repository; keep your existing gitignored `ABILanBot/appsettings.json` when updating.
+3. Configure `Discord.Token`, `Discord.GuildId` and `GameLobbyChannelName` there. Keep `Discord.EnableMessageContentIntent=true` if you want the legacy `!` commands.
+4. Double-click **Start ABI LAN Bot.cmd** at the repository root, or run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start-bot.ps1` from the repository root. The bypass is process-scoped and does not modify your permanent execution policy.
+5. If the bot has a CS2 RCON host configured, the launcher offers a hidden password prompt (unless the `CS2_RCON_PASSWORD` environment variable is already set). Press Enter to skip CS2 controls.
+6. Wait for the Discord connection message and try `/gamepick` or `/cs2 status`. Keep the window open during the LAN; press **Ctrl+C** to stop it.
+
+The launcher verifies the .NET 10 SDK, builds Release, validates configuration using the application's JSON parser (including JSON comments), launches from the correct working directory, and restarts the bot after a nonzero exit with a five-second delay. Normal clean exits do not restart.
+
+For troubleshooting, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start-bot.ps1 -NoRestart` to disable retries, or use `-SkipRconPrompt` to skip the CS2 password prompt and `-ValidateOnly` to check configuration and the .NET 10 SDK without launching the bot. The double-click `.cmd` launcher also forwards these switches when run from a terminal. GitHub Actions runs validation checks on a Windows runner. The script does not print or save credentials. Avoid running multiple copies at the same time.
+
+**Important:** GitHub Actions does not deploy the bot. Update the checkout on the personal PC containing your local `appsettings.json` before running it.
+
 ## Commands
 
 ### LAN fun (slash commands)
