@@ -22,6 +22,7 @@ The application and test project target `net10.0`. PR #7 merged on 2026-11-20 an
 | Markdown, agent instructions | Verify local paths/links and consistency with current source | Fresh-session agent can locate build and risk guidance |
 | NuGet, csproj, DI, startup | Restore + Release build + discovered MSTest tests | Clean checkout and Discord startup in an approved test guild |
 | Team allocation or pure logic | Release build + MSTest tests | Add deterministic unit tests for affected behavior when not already covered |
+| Native Discord food poll | Release build + `FoodPollServiceTests` | Authorized test guild: confirm poll renders, one vote per person, edit vote, automatic expiry and Create Polls permission |
 | Discord interaction/module | Release build | Explicitly authorized sandbox guild: command registration, permissions, error and happy paths |
 | Voice moves or channel cleanup | Release build | Fake/mocked operation first; approved test guild with members/channels created for the test |
 | Future CS2 RCON | Release build | Fake RCON client, command allowlist and auth tests; approved non-production server only |
