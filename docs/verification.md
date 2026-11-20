@@ -14,7 +14,7 @@ dotnet build ABILanBot.sln -c Release --no-restore
 
 The source project targets `net10.0`. At the time this document was added, `main` has **no unit/integration test project**, so do **not** claim `dotnet test` provides functional coverage until tests are added and discovered. For a code-only change, the build checks compilation; for a docs-only change, additionally check links and referenced file paths. Neither proves Discord behavior.
 
-A separate pending PR (#7 as of 2026-11-20) proposes a GitHub Actions restore/build workflow. Until it is merged and its checks are observed, do not describe `main` as having enforced CI. Even after merging, build-only CI is not unit-test or integration-test evidence.
+A separate pending PR (#7 as of 2026-11-20) proposes a GitHub Actions restore/build/test workflow and an `ABILanBot.Tests` project. Until it is merged and the checks are observed on `main`, do not describe `main` as having enforced CI or automated test coverage. After it lands, confirm that tests are discovered and executed; build success alone does not prove unit- or integration-test coverage.
 
 ## Select checks based on what changed
 
@@ -22,7 +22,7 @@ A separate pending PR (#7 as of 2026-11-20) proposes a GitHub Actions restore/bu
 | --- | --- | --- |
 | Markdown, agent instructions | Verify local paths/links and consistency with current source | Fresh-session agent can locate build and risk guidance |
 | NuGet, csproj, DI, startup | Restore + Release build | Clean checkout and Discord startup in an approved test guild |
-| Team allocation or pure logic | Release build | Automated deterministic unit tests once a test project exists |
+| Team allocation or pure logic | Release build | Automated deterministic unit tests in an available test project |
 | Discord interaction/module | Release build | Explicitly authorized sandbox guild: command registration, permissions, error and happy paths |
 | Voice moves or channel cleanup | Release build | Fake/mocked operation first; approved test guild with members/channels created for the test |
 | Future CS2 RCON | Release build | Fake RCON client, command allowlist and auth tests; approved non-production server only |
@@ -40,6 +40,6 @@ The bot is a live Discord client, not a harmless local CLI:
 
 In PRs, include: changed behavior, exact validation commands, pass/fail/not-run and reason, risks/side effects, and rollback. Avoid ambiguous claims like “tests pass” when only build ran.
 
-Highest-value follow-up after this entry-point change: add a focused automated test project and extract testable, Discord-independent team-selection logic. That is a separate, small, reversible improvement; do not pretend this documentation PR solves verification maturity by itself.
+Highest-value follow-up after this entry-point change: extract deterministic, Discord-independent team-selection logic and add focused tests to `ABILanBot.Tests` when PR #7's test project lands. That is a separate, small, reversible improvement; this documentation PR alone does not establish verification maturity.
 
 Sources for the approach: [Brain verification](https://rambolarsen.github.io/brain/#concepts%2Fverification), [documented repository entry points](https://rambolarsen.github.io/brain/#practices%2Fdocumented-repository-entry-points), and [small reversible changes](https://rambolarsen.github.io/brain/#principles%2Fsmall-reversible-changes).
