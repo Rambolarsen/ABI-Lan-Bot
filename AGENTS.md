@@ -7,7 +7,7 @@ This repository is a .NET 10 Discord bot for LAN events. Treat source code and t
 1. Read this file and inspect the files relevant to the task; do not load every document by default.
 2. Check the current branch, working tree and open PRs before editing. Keep a change small, reviewable and reversible.
 3. Read [architecture and behavior](docs/architecture.md) for code ownership and external side effects, and [verification](docs/verification.md) for the appropriate checks.
-4. Use the [Brain](https://rambolarsen.github.io/brain/) as a source of improvement hypotheses, not as a substitute for repository evidence. Its relevant starting points are [documented repository entry points](https://github.com/Rambolarsen/brain/blob/main/practices/documented-repository-entry-points.md), [verification](https://github.com/Rambolarsen/brain/blob/main/concepts/verification.md), and [small reversible changes](https://github.com/Rambolarsen/brain/blob/main/principles/small-reversible-changes.md).
+4. Use the [Brain](https://rambolarsen.github.io/brain/) as a source of improvement hypotheses, not as a substitute for repository evidence. Its relevant starting points are [documented repository entry points](https://rambolarsen.github.io/brain/#practices%2Fdocumented-repository-entry-points), [verification](https://rambolarsen.github.io/brain/#concepts%2Fverification), and [small reversible changes](https://rambolarsen.github.io/brain/#principles%2Fsmall-reversible-changes).
 
 ## Stack and build
 

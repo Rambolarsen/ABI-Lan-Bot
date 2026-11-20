@@ -42,4 +42,4 @@ In PRs, include: changed behavior, exact validation commands, pass/fail/not-run 
 
 Highest-value follow-up after this entry-point change: add a focused automated test project and extract testable, Discord-independent team-selection logic. That is a separate, small, reversible improvement; do not pretend this documentation PR solves verification maturity by itself.
 
-Sources for the approach: [Brain verification](https://github.com/Rambolarsen/brain/blob/main/concepts/verification.md), [documented repository entry points](https://github.com/Rambolarsen/brain/blob/main/practices/documented-repository-entry-points.md), and [small reversible changes](https://github.com/Rambolarsen/brain/blob/main/principles/small-reversible-changes.md).
+Sources for the approach: [Brain verification](https://rambolarsen.github.io/brain/#concepts%2Fverification), [documented repository entry points](https://rambolarsen.github.io/brain/#practices%2Fdocumented-repository-entry-points), and [small reversible changes](https://rambolarsen.github.io/brain/#principles%2Fsmall-reversible-changes).
