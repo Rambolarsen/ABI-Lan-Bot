@@ -124,7 +124,7 @@ Commands:
 - `/cs2 map de_mirage` — changes to a named installed map.
 - `/cs2 restartmatch` — restarts the **match**, not the server process.
 
-All commands except `status` require Discord **Manage Server** permission.
+`/cs2 status` and `/cs2 connect` are available to everyone in the configured Discord server. Only `mode`, `map` and `restartmatch` require Discord **Manage Server** permission.
 Map names are restricted to letters, numbers and underscores to prevent arbitrary
 commands being injected via Discord. No generic RCON console is exposed.
 

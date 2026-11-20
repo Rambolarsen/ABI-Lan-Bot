@@ -40,7 +40,7 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 
 ## CS2 / Source RCON (implemented)
 
-- `Cs2Module` registers the guild-only `/cs2` group. `status` reports selected, non-sensitive fields extracted by `Cs2StatusParser` from the RCON response (including the root spawngroup map format used by CS2); `mode`, `map` and `restartmatch` require Discord `ManageGuild`. Do not assume that status is an authorization check for administrative actions.
+- `Cs2Module` registers the guild-only `/cs2` group. `status` reports selected, non-sensitive fields extracted by `Cs2StatusParser` from the RCON response (including the root spawngroup map format used by CS2); `connect` reads public join details from configuration without RCON access; both are public within the guild. `mode`, `map` and `restartmatch` require Discord `ManageGuild`. Do not assume that status is an authorization check for administrative actions.
 - `Cs2RconService` takes `Cs2:Host` and `Cs2:Port` from configuration and reads `CS2_RCON_PASSWORD` from the bot process environment. Never commit, return or log that password.
 - The client uses fresh TCP connections, packet size/output limits and timeouts, and serializes administrative actions with a semaphore. Map names are constrained to a lowercase alphanumeric/underscore pattern; do not replace this with an arbitrary console command endpoint.
 - Source RCON traffic is **unencrypted**. Limit host/network exposure. Sending a map or mode command is not proof the game server applied it, particularly when it disconnects during a map transition.
