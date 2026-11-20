@@ -23,6 +23,8 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 | Voice channels | `Services/VoiceChannelService.cs` | Finds/creates team channels, caches them in memory, deletes eligible cached channels |
 | Member moves | `Services/MemberService.cs` | Changes members' voice channels using Discord API |
 | External HTTP | `Services/DadJokeService.cs` | Calls icanhazdadjoke.com via an injected `HttpClient`; returns fallback text on failure |
+| CS2 interactions | `Modules/Cs2Module.cs` | `/cs2 status`, `/cs2 mode`, `/cs2 map`, `/cs2 restartmatch`; enforces `ManageGuild` on changes |
+| RCON transport | `Services/Cs2RconService.cs` | Source RCON authentication, bounded packet handling, serialized administration, mode/map commands |
 | Result model | `Entities/TeamResult.cs` | Holds team allocation success, error, and groups |
 
 ## Important behavior constraints
@@ -34,8 +36,15 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 - `TeamService.CreateRandomTeams` is coupled to `SocketGuildUser` and randomness; consider extracting a pure, deterministic team allocator as a **separate tested change** before adding sophisticated balancing logic.
 - Do not infer that `/maketeams` exists from old help text. The current team-splitting command is `/scrimmage`; LAN fun commands are registered from `LanFunModule`.
 
-## Future CS2 / RCON integration
+## CS2 / Source RCON (implemented)
 
-No RCON integration exists on `main` as of this review. If introduced, separate Discord authorization and command parsing from a narrow RCON client, allowlist server actions (e.g. match mode, map change) rather than exposing free-form console commands, keep credentials outside source control, use timeouts, and test against a fake client before any live server.
+- `Cs2Module` registers the guild-only `/cs2` group. `status` reports selected, non-sensitive fields from the RCON response; `mode`, `map` and `restartmatch` require Discord `ManageGuild`. Do not assume that status is an authorization check for administrative actions.
+- `Cs2RconService` takes `Cs2:Host` and `Cs2:Port` from configuration and reads `CS2_RCON_PASSWORD` from the bot process environment. Never commit, return or log that password.
+- The client uses fresh TCP connections, packet size/output limits and timeouts, and serializes administrative actions with a semaphore. Map names are constrained to a lowercase alphanumeric/underscore pattern; do not replace this with an arbitrary console command endpoint.
+- Source RCON traffic is **unencrypted**. Limit host/network exposure. Sending a map or mode command is not proof the game server applied it, particularly when it disconnects during a map transition.
+- `ABILanBot.Tests/Cs2RconServiceTests.cs` uses an in-process loopback TCP server to test multi-packet status responses and completion detection, with no production CS2 connection. It is not a full CS2 integration suite.
+- Preserve Discord permission checks, input validation and secret handling when modifying the command surface. For offline tests, use an isolated fake RCON server; never issue real commands or move players merely to verify a code change.
+
+See the [README CS2 section](../README.md#cs2-server-controls-spillvert) for deployment prerequisites and the [verification guide](verification.md) for test selection.
 
 See [verification](verification.md) for the check matrix and [AGENTS.md](../AGENTS.md) for the working agreement.
