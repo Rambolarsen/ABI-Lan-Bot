@@ -95,10 +95,8 @@ public sealed class Cs2Module : InteractionModuleBase<SocketInteractionContext>
 
     private async Task ReportErrorAsync(Exception exception)
     {
-        Console.WriteLine($"CS2 RCON error: {exception.GetType().Name}: {exception.Message}");
-        await FollowupAsync(
-            "❌ Klarte ikke å fullføre RCON-kommandoen. Sjekk at CS2-serveren kjører, " +
-            "at RCON-passordet er riktig og at botmaskinen når TCP-porten.",
-            ephemeral: true);
+        // Do not publish raw exception details to Discord.
+        Console.Error.WriteLine($"CS2 RCON failure: {exception.GetType().Name}");
+        await FollowupAsync(Cs2RconErrorMessages.ToUserMessage(exception), ephemeral: true);
     }
 }

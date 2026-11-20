@@ -15,6 +15,8 @@ class Program
 	private IConfiguration? _configuration;
     private InteractionService? _interactionService;
     private IServiceProvider? _serviceProvider;
+    private ModuleInfo[] _globalModules = [];
+    private ModuleInfo[] _guildModules = [];
 
     static async Task Main(string[] args)
     {
@@ -68,7 +70,7 @@ class Program
         _interactionService = new InteractionService(_client);
 
         // Register modules
-        await _interactionService.AddModulesAsync(typeof(Program).Assembly, _serviceProvider);
+        (_globalModules, _guildModules) = await CommandRegistrationPlan.LoadAsync(_interactionService, _serviceProvider);
 
         // Subscribe to interaction events
         _client.InteractionCreated += async interaction =>
@@ -125,10 +127,24 @@ class Program
 	{
 		Console.WriteLine($"{_client?.CurrentUser} is connected and ready!");
 
-        // Register guild-scoped commands so updates become available promptly.
-        if (_interactionService is not null && _configuration is not null)
-            await _interactionService.RegisterCommandsToGuildAsync(
-                BotConfiguration.GetGuildId(_configuration));
+        if (_interactionService is null || _configuration is null) return;
+        var guildId = BotConfiguration.GetGuildId(_configuration);
+        try
+        {
+            // Publish only the explicitly approved modules in each scope.
+            Console.WriteLine($"[Commands] Registering LAN-only commands for guild {guildId}...");
+            var guildCommands = await _interactionService.AddModulesToGuildAsync(
+                guildId, deleteMissing: true, _guildModules);
+            Console.WriteLine($"[Commands] Registered {guildCommands.Count} guild commands.");
+            Console.WriteLine("[Commands] Registering DM-safe global commands...");
+            var globalCommands = await _interactionService.AddModulesGloballyAsync(
+                deleteMissing: true, _globalModules);
+            Console.WriteLine($"[Commands] Registered {globalCommands.Count} global commands.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[Commands] Registration failed ({ex.GetType().Name}): {ex.Message}");
+        }
 	}
 
 	private async Task MessageReceivedAsync(SocketMessage message)
