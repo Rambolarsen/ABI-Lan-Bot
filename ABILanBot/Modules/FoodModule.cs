@@ -4,7 +4,7 @@ using Discord.Interactions;
 
 namespace ABILanBot.Modules;
 
-[Group("food", "Vote on what to eat during the LAN.")]
+[Group("mat", "Stem over hvor vi skal bestille middag til LAN-et.")]
 [CommandContextType(InteractionContextType.Guild)]
 public sealed class FoodModule : InteractionModuleBase<SocketInteractionContext>
 {
@@ -12,23 +12,19 @@ public sealed class FoodModule : InteractionModuleBase<SocketInteractionContext>
 
     public FoodModule(FoodPollService polls) => _polls = polls;
 
-    [SlashCommand("vote", "Start a food vote in this channel.")]
-    public async Task VoteAsync(
-        [Summary("options", "Comma-separated food choices (default: Pizza, Burger, Kebab, Sushi)")]
-        string? options = null,
-        [Summary("meal", "What are we choosing food for?")]
-        [Choice("Lunch", "lunch")]
-        [Choice("Dinner", "dinner")]
-        [Choice("Snacks", "snacks")]
-        string meal = "dinner",
-        [Summary("hours", "How many hours voting remains open (1-24; default 2)")]
-        int hours = 2)
+    [SlashCommand("stem", "Start en middagsavstemning med restauranter som tilbyr levering i Sandvika.")]
+    public async Task StemAsync(
+        [Summary("timer", "Hvor mange timer kan folk stemme? (1–24, standard 2)")]
+        int timer = 2)
     {
         try
         {
-            var poll = _polls.CreatePoll(options, meal, hours);
+            var poll = _polls.CreatePoll(timer);
             await RespondAsync(
-                "🍽️ **LAN food vote!** One choice per person. Change your vote before the poll closes.",
+                "🍕 **Middagsavstemning for LAN-et!** Velg én restaurant. " +
+                "Du kan endre stemmen din før fristen.\n" +
+                "Menyer og bestilling:\n" + _polls.GetOrderingLinks() + "\n" +
+                "_Sjekk at restauranten leverer til vår adresse når vi skal bestille._",
                 poll: poll,
                 allowedMentions: AllowedMentions.None);
         }

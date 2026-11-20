@@ -12,14 +12,14 @@ A Discord LAN party bot built with .NET 10 LTS and Discord.Net. It creates rando
 - **/lanbingo** — Get a randomized 3x3 bingo card with a free center square. Run again for a new card.
 - **/dadjoke** — Get a random dad joke (requires an internet connection).
 
-### Food voting (slash commands)
+### Middagsavstemning i Sandvika (slash-kommando)
 
-- **/food vote** — Starts a native Discord poll so everyone can choose what to eat.
-  - `options`: optional comma-separated 2–10 choices (defaults: Pizza, Burger, Kebab, Sushi).
-  - `meal`: `lunch`, `dinner` (default), or `snacks`.
-  - `hours`: voting window from 1–24 hours (default: 2).
-  - Example: `/food vote options: Pizza, Burger, Sushi meal: dinner hours: 2`.
-  - Each person gets one vote and can change it before the deadline. Discord tracks the votes, closes the poll and displays results; tied results remain tied. Polls survive bot restarts. The bot does not automatically place food orders or announce a tiebreaker.
+- **/mat stem** — Starter en Discord-avstemning om **hvor vi bestiller middag fra**.
+  - `timer`: avstemningen varer 1–24 timer (standard 2).
+  - Ingen valg for lunsj eller snacks; heller ingen fritekstrestauranter.
+  - Alternativer (sjekket mot Wolts publiserte leveringsmenyer for Sandvika 20. november 2026): Domino's Pizza Sandvika, Sandvika Pizza og Kebab, EL GRECO Sandvika, WU Restaurant Sandvika, Zouq Sandvika, El Camino Sandvika og Steam & Stir.
+  - Botmeldingen viser lenker til menyene. Alle får én stemme og kan endre denne før fristen. Discord holder orden på stemmene og avslutter avstemningen.
+  - **Viktig:** Levering må bekreftes for LAN-lokalets konkrete adresse og klokkeslett ved bestilling. Listen er kuratert, ikke en sanntidssjekk. Botten bestiller ikke mat og avgjør ikke stemmelikhet automatisk.
 
 ### Teams and voice channels (slash commands)
 
@@ -54,7 +54,7 @@ Slash commands register to the configured LAN guild when the bot starts. They ar
 4. To use `!` commands, enable the privileged **Message Content Intent** in the Discord Developer Portal and set `Discord:EnableMessageContentIntent` to `true` (the default). For a slash-only bot set it to `false`. The bot will not request that privileged intent or process text commands.
 
    **Upgrade note:** Existing installations must add `Discord:GuildId` to their local appsettings.json before deploying this branch.
-5. Invite the bot with bot and applications.commands OAuth2 scopes. Give it View Channels and Send Messages for responses; grant **Create Polls** for `/food vote`. For team splitting and cleanup, also grant Move Members and Manage Channels.
+5. Invite the bot with bot and applications.commands OAuth2 scopes. Give it View Channels and Send Messages for responses; grant **Create Polls** for `/mat stem`. For team splitting and cleanup, also grant Move Members and Manage Channels.
 6. Build and run:
 
    ```bash

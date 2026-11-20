@@ -129,7 +129,7 @@ class Program
                     "• `/gamepick` - Randomly pick the next game\n" +
                     "• `/challenge` - Get a LAN party challenge\n" +
                     "• `/lanbingo` - Generate a LAN bingo card\n" +
-                    "• `/food vote` - Let everyone vote on lunch, dinner, or snacks"
+                    "• `/mat stem` - Stem på hvor vi bestiller middag fra"
 			);
 		}
 		// Check for info command

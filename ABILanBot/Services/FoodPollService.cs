@@ -2,53 +2,43 @@ using Discord;
 
 namespace ABILanBot.Services;
 
-/// <summary>Creates native Discord food polls; Discord stores votes and closes polls.</summary>
+/// <summary>
+/// Faste middagsalternativer med publiserte leveringsmenyer for Sandvika.
+/// Tilgjengelighet på konkret adresse må kontrolleres ved bestilling.
+/// </summary>
 public sealed class FoodPollService
 {
-    private static readonly string[] DefaultOptions = ["Pizza", "Burger", "Kebab", "Sushi"];
+    public sealed record Restaurant(string Name, string OrderingUrl);
 
-    public PollProperties CreatePoll(string? options = null, string meal = "dinner", int hours = 2)
+    public static IReadOnlyList<Restaurant> Restaurants { get; } = Array.AsReadOnly<Restaurant>(
+    [
+        new("Domino's Pizza Sandvika", "https://wolt.com/nb/nor/sandvika/restaurant/dominos-pizza-sandvika"),
+        new("Sandvika Pizza og Kebab", "https://wolt.com/nb/nor/sandvika/restaurant/sandvika-pizza-kebab"),
+        new("EL GRECO Sandvika", "https://wolt.com/nb/nor/sandvika/restaurant/el-greco-sandvika"),
+        new("WU Restaurant Sandvika", "https://wolt.com/nb/nor/sandvika/restaurant/wu-restaurant-sandvika"),
+        new("Zouq Sandvika", "https://wolt.com/nb/nor/sandvika/restaurant/zouq-sandvika"),
+        new("El Camino Sandvika", "https://wolt.com/nb/nor/sandvika/restaurant/el-camino-sandvika"),
+        new("Steam & Stir", "https://wolt.com/nb/nor/asker-og-sandvika/restaurant/steam-stir")
+    ]);
+
+    public PollProperties CreatePoll(int timer = 2)
     {
-        if (hours is < 1 or > 24)
-            throw new ArgumentException("Voting duration must be between 1 and 24 hours.");
-
-        var question = meal?.ToLowerInvariant() switch
-        {
-            "lunch" => "🥪 What should we eat for lunch?",
-            "dinner" => "🍕 What should we eat for dinner?",
-            "snacks" => "🍿 Which snacks should we get?",
-            _ => throw new ArgumentException("Choose lunch, dinner, or snacks.")
-        };
-
-        if (options?.Length > 1000)
-            throw new ArgumentException("The food list is too long (maximum 1000 characters).");
-
-        var choices = string.IsNullOrWhiteSpace(options)
-            ? DefaultOptions
-            : options.Split(',', StringSplitOptions.TrimEntries);
-
-        if (choices.Length is < 2 or > 10)
-            throw new ArgumentException("Provide 2 to 10 food choices, separated by commas.");
-
-        if (choices.Any(choice =>
-                string.IsNullOrWhiteSpace(choice) ||
-                choice.Length > 55 ||
-                choice.Any(c => char.IsControl(c) || c is '@' or '<' or '>' or '`')))
-        {
-            throw new ArgumentException(
-                "Each choice must be 1 to 55 characters, without empty entries, control characters, or mentions.");
-        }
-
-        if (choices.Distinct(StringComparer.OrdinalIgnoreCase).Count() != choices.Length)
-            throw new ArgumentException("Food choices must be unique (ignoring capitalization).");
+        if (timer is < 1 or > 24)
+            throw new ArgumentException("Avstemningen må vare mellom 1 og 24 timer.");
 
         return new PollProperties
         {
-            Question = new PollMediaProperties { Text = question },
-            Answers = choices.Select(choice => new PollMediaProperties { Text = choice }).ToList(),
-            Duration = (uint)hours,
+            Question = new PollMediaProperties { Text = "🍽️ Hvor skal vi bestille middag fra?" },
+            Answers = Restaurants
+                .Select(restaurant => new PollMediaProperties { Text = restaurant.Name })
+                .ToList(),
+            Duration = (uint)timer,
             AllowMultiselect = false,
             LayoutType = PollLayout.Default
         };
     }
+
+    public string GetOrderingLinks() =>
+        string.Join("\n", Restaurants.Select(restaurant =>
+            $"• {restaurant.Name}: <{restaurant.OrderingUrl}>"));
 }

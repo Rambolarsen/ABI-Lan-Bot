@@ -17,7 +17,7 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 | Slash commands | `Modules/DadJokeModule.cs` | `/dadjoke`; delegates HTTP retrieval |
 | LAN fun commands | `Modules/LanFunModule.cs` | `/gamepick`, `/challenge`, `/lanbingo`; delegates generation to `LanFunService` |
 | LAN fun logic | `Services/LanFunService.cs` | Game selection, challenge selection and bingo content |
-| Food voting | `Modules/FoodModule.cs` and `Services/FoodPollService.cs` | Validates food choices and posts native Discord single-vote polls; Discord owns votes, expiry and results |
+| Food voting | `Modules/FoodModule.cs` and `Services/FoodPollService.cs` | Publishes a fixed list of verified Sandvika delivery menus via `/mat stem`; Discord owns votes, expiry and results |
 | Bot configuration | `Services/BotConfiguration.cs` | Reads and validates guild and message-content settings |
 | Dependency injection | `Services/BotServiceRegistration.cs` | Production/test service registrations and socket configuration |
 | Team allocation | `Services/TeamService.cs` | Shuffles connected users and distributes them round-robin |
