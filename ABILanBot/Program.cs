@@ -140,7 +140,7 @@ class Program
 				.WithTitle("ABI Lan Bot")
 				.WithDescription("A Discord bot built with Discord.Net")
 				.WithColor(Color.Blue)
-				.AddField("Version", "1.0.0", inline: true)
+				.AddField("Version", typeof(Program).Assembly.GetName().Version?.ToString(3) ?? "unknown", inline: true)
 				.AddField("Framework", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription, inline: true)
 				.AddField("Library", $"Discord.Net {typeof(DiscordSocketClient).Assembly.GetName().Version?.ToString(3)}", inline: true)
 				.WithCurrentTimestamp()
