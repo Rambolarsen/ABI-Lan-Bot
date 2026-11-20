@@ -16,7 +16,37 @@ class Program
     private InteractionService? _interactionService;
     private IServiceProvider? _serviceProvider;
 
-    static Task Main(string[] args) => new Program().MainAsync();
+    static async Task Main(string[] args)
+    {
+        if (args.Contains("--validate-config", StringComparer.OrdinalIgnoreCase))
+        {
+            Environment.ExitCode = ValidateConfigForLauncher();
+            return;
+        }
+
+        await new Program().MainAsync();
+    }
+
+    private static int ValidateConfigForLauncher()
+    {
+        try
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            StartupConfigurationValidator.Validate(config);
+            Console.WriteLine("Configuration valid.");
+            Console.WriteLine($"CS2_RCON_CONFIGURED={(!string.IsNullOrWhiteSpace(config["Cs2:Host"])).ToString().ToLowerInvariant()}");
+            return 0;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or ArgumentException)
+        {
+            Console.Error.WriteLine($"Configuration validation failed: {ex.Message}");
+            return 1;
+        }
+    }
 
 	private async Task MainAsync()
 	{

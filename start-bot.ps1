@@ -6,8 +6,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$root = $PSScriptRoot
-$app = Join-Path $root 'ABILanBot'
+$app = Join-Path $PSScriptRoot 'ABILanBot'
 $configPath = Join-Path $app 'appsettings.json'
 $projectPath = Join-Path $app 'ABILanBot.csproj'
 
@@ -17,29 +16,12 @@ function Stop-WithError([string]$message) {
 }
 
 if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
-    Stop-WithError "Missing ABILanBot\appsettings.json. Copy appsettings.example.json and add your bot token and guild ID."
+    Stop-WithError 'Missing ABILanBot/appsettings.json. Copy appsettings.example.json and add your bot token and guild ID.'
 }
-
-try {
-    $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
-} catch {
-    Stop-WithError 'appsettings.json is not valid JSON.'
-}
-
-$token = [string]$config.Discord.Token
-$guildId = [string]$config.Discord.GuildId
-$parsedGuildId = [ulong]0
-if ([string]::IsNullOrWhiteSpace($token) -or
-    $token -in @('YOUR_BOT_TOKEN_HERE', 'PASTE_YOUR_TOKEN_HERE')) {
-    Stop-WithError 'Set Discord.Token to your actual Discord bot token.'
-}
-if (-not [ulong]::TryParse($guildId, [ref]$parsedGuildId) -or $parsedGuildId -eq 0) {
-    Stop-WithError 'Set Discord.GuildId to a valid Discord server ID.'
-}
-
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Stop-WithError 'dotnet was not found. Install .NET 10 SDK and reopen your terminal.'
+    Stop-WithError 'dotnet was not found. Install .NET 10 SDK and reopen the terminal.'
 }
+
 try {
     $sdks = @(& dotnet --list-sdks)
 } catch {
@@ -49,54 +31,58 @@ if ($LASTEXITCODE -ne 0 -or @($sdks | Where-Object { $_ -match '^10\.' }).Count 
     Stop-WithError 'Install .NET 10 SDK: https://dotnet.microsoft.com/download/dotnet/10.0'
 }
 
-if ($ValidateOnly) {
-    Write-Host "[ABI LAN Bot] Startup configuration and .NET 10 SDK validated." -ForegroundColor Green
-    return
-}
-
-# Do not persist passwords. RCON is optional; other bot features work without it.
-if (-not $SkipRconPrompt -and
-    -not [string]::IsNullOrWhiteSpace([string]$config.Cs2.Host) -and
-    [string]::IsNullOrWhiteSpace($env:CS2_RCON_PASSWORD)) {
-    Write-Host 'CS2 RCON is configured; press Enter to skip CS2 controls.' -ForegroundColor Yellow
-    $secure = Read-Host 'CS2 RCON password (hidden)' -AsSecureString
-    if ($secure.Length -gt 0) {
-        $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
-        try {
-            $env:CS2_RCON_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
-        } finally {
-            [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
-        }
-    }
-    Remove-Variable secure -ErrorAction SilentlyContinue
-}
-
-Write-Host 'Building ABI LAN Bot (Release)...' -ForegroundColor Cyan
+Write-Host '[ABI LAN Bot] Building Release...' -ForegroundColor Cyan
 & dotnet build $projectPath --configuration Release
 if ($LASTEXITCODE -ne 0) {
-    Stop-WithError 'Build failed. See the errors above.'
+    Stop-WithError 'Build failed. See build output above.'
 }
 
-Write-Host "Configuration OK. Guild ID: $guildId" -ForegroundColor Green
-Write-Host 'Check Discord for the bot to come online. Ctrl+C stops it.' -ForegroundColor Cyan
-
-# Program.cs reads appsettings.json from the process working directory.
+# The application loads appsettings.json from the current directory.
 Push-Location $app
 try {
+    # Invoke the actual .NET JSON configuration parser so comments/trailing commas
+    # accepted by the bot are also accepted by the launcher.
+    $validation = @(& dotnet run --project $projectPath --configuration Release --no-build --no-restore -- --validate-config)
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithError 'Configuration validation failed. See the preceding message.'
+    }
+
+    if ($ValidateOnly) {
+        Write-Host '[ABI LAN Bot] SDK, build and configuration validated.' -ForegroundColor Green
+        return
+    }
+
+    $cs2Configured = $validation -contains 'CS2_RCON_CONFIGURED=true'
+    if ($cs2Configured -and -not $SkipRconPrompt -and
+        [string]::IsNullOrWhiteSpace($env:CS2_RCON_PASSWORD)) {
+        Write-Host 'CS2 RCON detected. Press Enter to skip optional CS2 controls.' -ForegroundColor Yellow
+        $secure = Read-Host 'CS2 RCON password (hidden)' -AsSecureString
+        if ($secure.Length -gt 0) {
+            $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+            try {
+                $env:CS2_RCON_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
+            } finally {
+                [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+            }
+        }
+        Remove-Variable secure -ErrorAction SilentlyContinue
+    }
+
+    Write-Host '[ABI LAN Bot] Starting. Check Discord; Ctrl+C stops the launcher.' -ForegroundColor Green
     $attempt = 0
     while ($true) {
         $attempt++
-        Write-Host "[ABI LAN Bot] Starting (attempt $attempt)..." -ForegroundColor Cyan
+        Write-Host "[ABI LAN Bot] Start attempt $attempt" -ForegroundColor Cyan
         & dotnet run --project $projectPath --configuration Release --no-build --no-restore
         $exitCode = $LASTEXITCODE
 
         if ($NoRestart) {
-            Write-Host "[ABI LAN Bot] Exited with code $exitCode (restart disabled)."
+            Write-Host "[ABI LAN Bot] Exited with code $exitCode (restarts disabled)."
             if ($exitCode -ne 0) { exit $exitCode }
             break
         }
 
-        Write-Host "[ABI LAN Bot] Process exited ($exitCode). Restarting in 5s; Ctrl+C cancels." -ForegroundColor Yellow
+        Write-Host "[ABI LAN Bot] Exited with code $exitCode. Retrying in 5 seconds. Ctrl+C cancels." -ForegroundColor Yellow
         Start-Sleep -Seconds 5
     }
 } finally {
