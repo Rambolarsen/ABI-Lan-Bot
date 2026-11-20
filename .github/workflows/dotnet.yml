@@ -62,6 +62,8 @@ jobs:
               ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $configPath
             & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./start-bot.ps1 -ValidateOnly -SkipRconPrompt
             if ($LASTEXITCODE -eq 0) { throw 'Expected validation to fail for invalid guild ID' }
+            # GitHub's pwsh wrapper exits with LASTEXITCODE if left nonzero.
+            $global:LASTEXITCODE = 0
           }
           finally {
             Remove-Item -LiteralPath $configPath -ErrorAction SilentlyContinue
