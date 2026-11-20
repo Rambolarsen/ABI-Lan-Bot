@@ -24,8 +24,9 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 | Voice channels | `Services/VoiceChannelService.cs` | Finds/creates team channels, caches them in memory, deletes eligible cached channels |
 | Member moves | `Services/MemberService.cs` | Changes members' voice channels using Discord API |
 | External HTTP | `Services/DadJokeService.cs` | Calls icanhazdadjoke.com via an injected `HttpClient`; returns fallback text on failure |
-| CS2 interactions | `Modules/Cs2Module.cs` | `/cs2 status`, `/cs2 mode`, `/cs2 map`, `/cs2 restartmatch`; enforces `ManageGuild` on changes |
+| CS2 interactions | `Modules/Cs2Module.cs` | `/cs2 connect` (public join details), `/cs2 status`, `/cs2 mode`, `/cs2 map`, `/cs2 restartmatch`; enforces `ManageGuild` on changes |
 | RCON transport | `Services/Cs2RconService.cs` | Source RCON authentication, bounded packet handling, serialized administration, mode/map commands |
+| CS2 join details | `Services/Cs2ConnectInfo.cs` | Validated public game endpoint and optional join password, never the RCON secret |
 | Result model | `Entities/TeamResult.cs` | Holds team allocation success, error, and groups |
 
 ## Important behavior constraints

@@ -10,7 +10,42 @@ public sealed class Cs2Module : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly Cs2RconService _rcon;
 
-    public Cs2Module(Cs2RconService rcon) => _rcon = rcon;
+    private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
+
+    public Cs2Module(Cs2RconService rcon, Microsoft.Extensions.Configuration.IConfiguration config)
+    {
+        _rcon = rcon;
+        _config = config;
+    }
+
+    [SlashCommand("connect", "Vis CS2-serveradresse og passord for å bli med")]
+    public async Task ConnectAsync()
+    {
+        try
+        {
+            // Read-only join information. Do not connect to RCON or expose its
+            // separate CS2_RCON_PASSWORD environment secret.
+            var join = Cs2ConnectInfo.GetJoinInfo(_config);
+            var command = join.Password is null
+                ? $"connect {join.Address}"
+                : $"password {join.Password}; connect {join.Address}";
+
+            var passwordLine = join.Password is null
+                ? "Passord: **Ikke nødvendig**"
+                : $"Passord: `{join.Password}`";
+
+            await RespondAsync(
+                $"🎮 **Bli med på Bouvet-LAN CS2**\n" +
+                $"Server: `{join.Address}`\n" +
+                $"{passwordLine}\n" +
+                "Åpne utviklerkonsollen i CS2 og lim inn:\n" +
+                $"```\n{command}\n```");
+        }
+        catch (InvalidOperationException)
+        {
+            await RespondAsync("❌ CS2-tilkoblingsinformasjonen er ikke konfigurert riktig.", ephemeral: true);
+        }
+    }
 
     [SlashCommand("status", "Se om CS2-serveren svarer, med kart og antall spillere")]
     public async Task StatusAsync()

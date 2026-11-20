@@ -116,6 +116,7 @@ minimal Source RCON client in `Services/Cs2RconService.cs`.
 Commands:
 
 - `/cs2 status` — public map, player count (when reported), and connectivity.
+- `/cs2 connect` — shows the public game address, join password and a copyable CS2 console command; does not contact RCON.
 - `/cs2 mode ArmsRace` — sets `game_type 1` / `game_mode 0` and loads `ar_pool_day`.
 - `/cs2 mode Deathmatch` — sets `game_type 1` / `game_mode 2` and loads `de_dust2`.
 - `/cs2 mode Casual` — sets `game_type 0` / `game_mode 0` and loads `de_mirage`.
@@ -129,12 +130,23 @@ commands being injected via Discord. No generic RCON console is exposed.
 
 ### Configuration
 
+`/cs2 connect` uses `Cs2:JoinHost`, `Cs2:JoinPort` and optional `Cs2:JoinPassword`. For this LAN the public join password is `bouvet`, intentionally displayed in the Discord channel. If `JoinHost`/`JoinPort` are omitted, the bot falls back to `Cs2:Host`/`Cs2:Port`; set the dedicated join endpoint if the game port differs from the RCON port. The console instruction sets the password before connecting:
+
+```text
+password bouvet; connect oslo21.spillvert.no:27020
+```
+
+This is the **game join password**, not `CS2_RCON_PASSWORD`. Never publish the RCON administration credential. Confirm the host/port are the actual playable game endpoint in Spillvert.
+
 Include these settings in the bot's **local**, gitignored `appsettings.json`:
 
 ```json
 "Cs2": {
   "Host": "oslo21.spillvert.no",
-  "Port": 27020
+  "Port": 27020,
+  "JoinHost": "oslo21.spillvert.no",
+  "JoinPort": 27020,
+  "JoinPassword": "bouvet"
 }
 ```
 
