@@ -14,8 +14,8 @@ public sealed class TeamAllocatorTests
         var teams = TeamAllocator.Split(members, 4, new Random(1234));
         var allMembers = teams.SelectMany(team => team).ToArray();
 
-        Assert.HasCount(4, teams);
-        Assert.HasCount(members.Length, allMembers);
+        Assert.AreEqual(4, teams.Count);
+        Assert.AreEqual(members.Length, allMembers.Length);
         CollectionAssert.AreEquivalent(members, allMembers);
         Assert.IsTrue(teams.Max(team => team.Count) - teams.Min(team => team.Count) <= 1);
     }
@@ -48,7 +48,7 @@ public sealed class TeamAllocatorTests
     {
         var teams = TeamAllocator.Split(new[] { "A", "B" }, 4, new Random(9));
 
-        Assert.HasCount(4, teams);
+        Assert.AreEqual(4, teams.Count);
         CollectionAssert.AreEquivalent(new[] { "A", "B" }, teams.SelectMany(x => x).ToArray());
         CollectionAssert.AreEquivalent(new[] { 1, 1, 0, 0 }, teams.Select(x => x.Count).ToArray());
     }
@@ -58,7 +58,7 @@ public sealed class TeamAllocatorTests
     {
         var teams = TeamAllocator.Split(Array.Empty<int>(), 3, new Random(0));
 
-        Assert.HasCount(3, teams);
+        Assert.AreEqual(3, teams.Count);
         Assert.IsTrue(teams.All(team => team.Count == 0));
     }
 
