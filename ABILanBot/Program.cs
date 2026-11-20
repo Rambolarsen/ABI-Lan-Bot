@@ -1,4 +1,4 @@
-﻿using ABILanBot.Modules;
+using ABILanBot.Modules;
 using ABILanBot.Services;
 using Discord;
 using Discord.Interactions;
@@ -26,25 +26,10 @@ class Program
 			.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 			.Build();
 
-		// Create service collection and register services
-		var services = new ServiceCollection();
-		services.AddSingleton(_configuration);
-		services.AddSingleton<DiscordSocketClient>(provider =>
-		{
-			var config = new DiscordSocketConfig
-			{
-				GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
-			};
-			return new DiscordSocketClient(config);
-		});
-		// Register your custom services here, for example:
-		services.AddSingleton<TeamService>();
-		services.AddSingleton<VoiceChannelService>();
-		services.AddSingleton<MemberService>();
-		services.AddSingleton<TeamsModule>();
-		services.AddHttpClient<DadJokeService>();
-
-		_serviceProvider = services.BuildServiceProvider();
+		// Register all bot dependencies via a single composition root shared with tests.
+        _serviceProvider = new ServiceCollection()
+            .AddBotServices(_configuration)
+            .BuildServiceProvider(validateScopes: true);
 
 		// Resolve Discord client
 		_client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
@@ -59,13 +44,16 @@ class Program
         _client.InteractionCreated += async interaction =>
         {
             var ctx = new SocketInteractionContext(_client, interaction);
-            await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
+            var result = await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
+            if (!result.IsSuccess)
+                Console.Error.WriteLine($"Slash command failed: {result.ErrorReason}");
         };
 
         // Subscribe to events
         _client.Log += LogAsync;
 		_client.Ready += ReadyAsync;
-		_client.MessageReceived += MessageReceivedAsync;
+		if (BotConfiguration.IsMessageContentEnabled(_configuration))
+            _client.MessageReceived += MessageReceivedAsync;
 
 		// Get token from configuration
 		var token = _configuration["Discord:Token"];
@@ -77,7 +65,19 @@ class Program
 			return;
 		}
 
-		// Login and start
+		// Validate deployment configuration before connecting to Discord.
+        try
+        {
+            _ = BotConfiguration.GetGuildId(_configuration);
+            _ = BotConfiguration.IsMessageContentEnabled(_configuration);
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.Error.WriteLine($"Invalid Discord configuration: {ex.Message}");
+            return;
+        }
+
+        // Login and start
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
 
@@ -95,12 +95,10 @@ class Program
 	{
 		Console.WriteLine($"{_client?.CurrentUser} is connected and ready!");
 
-        // Register commands to a specific guild (for testing)
-        // Remove or comment out this line for production
-        // Replace GUILD_ID with your actual guild (server) ID
-        ulong guildId = 1439887410107519087;
-		if(_interactionService != null)
-			await _interactionService.RegisterCommandsToGuildAsync(guildId);
+        // Register guild-scoped commands so updates become available promptly.
+        if (_interactionService is not null && _configuration is not null)
+            await _interactionService.RegisterCommandsToGuildAsync(
+                BotConfiguration.GetGuildId(_configuration));
 	}
 
 	private async Task MessageReceivedAsync(SocketMessage message)
@@ -125,9 +123,12 @@ class Program
 				"• `!info` - Display bot information\n\n" +
 				"**Slash Commands:**\n" +
 				"• `/dadjoke` - Get a random dad joke\n" +
-				"• `/maketeams` - Split people in your voice channel into random teams\n" +
+				"• `/scrimmage` - Split the lobby into random teams\n" +
 				"• `/returntolobby` - Move all members from team channels back to the game lobby\n" +
-				"• `/cleanupchannels` - Delete empty team voice channels created by the bot"
+				"• `/cleanupchannels` - Delete empty team voice channels created by the bot\n" +
+                    "• `/gamepick` - Randomly pick the next game\n" +
+                    "• `/challenge` - Get a LAN party challenge\n" +
+                    "• `/lanbingo` - Generate a LAN bingo card"
 			);
 		}
 		// Check for info command
@@ -137,9 +138,9 @@ class Program
 				.WithTitle("ABI Lan Bot")
 				.WithDescription("A Discord bot built with Discord.Net")
 				.WithColor(Color.Blue)
-				.AddField("Version", "1.0.0", inline: true)
-				.AddField("Framework", ".NET 10.0", inline: true)
-				.AddField("Library", "Discord.Net 3.18.0", inline: true)
+				.AddField("Version", typeof(Program).Assembly.GetName().Version?.ToString(3) ?? "unknown", inline: true)
+				.AddField("Framework", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription, inline: true)
+				.AddField("Library", $"Discord.Net {typeof(DiscordSocketClient).Assembly.GetName().Version?.ToString(3)}", inline: true)
 				.WithCurrentTimestamp()
 				.Build();
 

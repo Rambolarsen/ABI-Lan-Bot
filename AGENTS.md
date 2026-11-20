@@ -21,13 +21,15 @@ dotnet restore ABILanBot.sln
 dotnet build ABILanBot.sln -c Release --no-restore
 ```
 
-- There is no automated test project on `main` at the time this guide was written. `dotnet test` returning success without finding tests is **not** evidence of test coverage. Re-check the tree and report exactly what ran.
+- `ABILanBot.Tests/` is an MSTest project. After building, run `dotnet test ABILanBot.sln -c Release --no-build` and confirm tests were discovered and executed. These tests do not prove live Discord behavior.
 - Running the bot requires a Discord token and real network access. `Program.cs` loads `appsettings.json` relative to the working directory, so run from `ABILanBot/` rather than assuming `dotnet run --project` from the root will find it.
 - Never commit `appsettings.json`, tokens, RCON passwords, IP allowlists containing private infrastructure, or logs containing credentials.
 
 ## Where changes belong
 
-- `ABILanBot/Program.cs`: configuration, dependency injection, Discord client startup, event handlers and command registration.
+- `ABILanBot/Program.cs`: Discord client startup, event handlers and command registration.
+- `ABILanBot/Services/BotServiceRegistration.cs`: dependency injection registrations shared by production and tests.
+- `ABILanBot/Services/BotConfiguration.cs`: validated Discord guild and message-content settings.
 - `ABILanBot/Modules/`: Discord slash-command entry points and user-facing responses.
 - `ABILanBot/Services/`: team selection, member/channel operations and HTTP clients.
 - `ABILanBot/Entities/`: result/data types.

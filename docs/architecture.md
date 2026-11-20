@@ -4,10 +4,10 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 
 ## Startup and configuration
 
-- `ABILanBot/Program.cs` builds configuration from `appsettings.json` relative to the **process working directory**, sets up dependency injection, starts `DiscordSocketClient` and `InteractionService`, and handles `!ping`, `!help`, and `!info`.
+- `ABILanBot/Program.cs` builds configuration from `appsettings.json` relative to the **process working directory**, creates services through `BotServiceRegistration`, starts `DiscordSocketClient` and `InteractionService`, and handles `!ping`, `!help`, and `!info`.
 - Discord login requires `Discord:Token`. `GameLobbyChannelName` is used by `TeamsModule`. See `ABILanBot/appsettings.example.json` for a non-secret example.
-- On Ready, `Program.cs` currently registers slash commands to **one hard-coded guild ID** (not globally). Avoid hard-coding additional guild IDs; make any new environment-specific values configurable.
-- The client requests `MessageContent` gateway intent. Running a real bot also depends on Discord-side permissions and intent settings.
+- On Ready, `Program.cs` registers slash commands to the guild specified by `Discord:GuildId` via `BotConfiguration.GetGuildId` (not globally). Do not hard-code guild IDs.
+- The client requests `MessageContent` gateway intent only when `Discord:EnableMessageContent` is enabled. Running text commands requires both this setting and the corresponding Discord-side intent; slash commands do not depend on that intent.
 
 ## Command and service boundaries
 
@@ -15,6 +15,10 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 | --- | --- | --- |
 | Slash commands | `Modules/TeamsModule.cs` | `/scrimmage`, `/returntolobby`, `/cleanupchannels`; constructs responses and invokes services |
 | Slash commands | `Modules/DadJokeModule.cs` | `/dadjoke`; delegates HTTP retrieval |
+| LAN fun commands | `Modules/LanFunModule.cs` | `/gamepick`, `/challenge`, `/lanbingo`; delegates generation to `LanFunService` |
+| LAN fun logic | `Services/LanFunService.cs` | Game selection, challenge selection and bingo content |
+| Bot configuration | `Services/BotConfiguration.cs` | Reads and validates guild and message-content settings |
+| Dependency injection | `Services/BotServiceRegistration.cs` | Production/test service registrations and socket configuration |
 | Team allocation | `Services/TeamService.cs` | Shuffles connected users and distributes them round-robin |
 | Voice channels | `Services/VoiceChannelService.cs` | Finds/creates team channels, caches them in memory, deletes eligible cached channels |
 | Member moves | `Services/MemberService.cs` | Changes members' voice channels using Discord API |
@@ -28,7 +32,7 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 - `/cleanupchannels` can delete channels; its `force-delete` parameter may delete occupied ones. `/returntolobby` moves users. These require careful permission design and explicit approval for live tests.
 - `MemberService` catches individual move failures and logs them; callers should not assume every move succeeded just because the method returned.
 - `TeamService.CreateRandomTeams` is coupled to `SocketGuildUser` and randomness; consider extracting a pure, deterministic team allocator as a **separate tested change** before adding sophisticated balancing logic.
-- Do not infer that `/maketeams` exists from old help text. The current registered entry point is `/scrimmage`.
+- Do not infer that `/maketeams` exists from old help text. The current team-splitting command is `/scrimmage`; LAN fun commands are registered from `LanFunModule`.
 
 ## Future CS2 / RCON integration
 
