@@ -60,5 +60,7 @@ public sealed class BotConfigurationTests
 
         Assert.IsNotNull(provider.GetRequiredService<LanFunService>());
         Assert.IsNotNull(ActivatorUtilities.CreateInstance<LanFunModule>(provider));
+        Assert.IsNotNull(provider.GetRequiredService<Cs2RconService>());
+        Assert.IsNotNull(ActivatorUtilities.CreateInstance<Cs2Module>(provider));
     }
 }
