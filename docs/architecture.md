@@ -34,7 +34,7 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 - Team voice channels are named `Game room N`. The current channel cache is **in-memory and keyed by channel name**, not by guild; it does not survive a restart. Verify channel ownership and guild scope before expanding reuse or cleanup.
 - `/cleanupchannels` can delete channels; its `force-delete` parameter may delete occupied ones. `/returntolobby` moves users. These require careful permission design and explicit approval for live tests.
 - `MemberService` catches individual move failures and logs them; callers should not assume every move succeeded just because the method returned.
-- `TeamService.CreateRandomTeams` is coupled to `SocketGuildUser` and randomness; consider extracting a pure, deterministic team allocator as a **separate tested change** before adding sophisticated balancing logic.
+- `TeamService.CreateRandomTeams` adapts `SocketGuildUser` input to the Discord-independent `TeamAllocator.Split<T>` (Fisher-Yates plus round-robin). `ABILanBot.Tests/TeamAllocatorTests.cs` uses seeded randomness to check reproducibility, balanced sizes, no missing/duplicate members and empty lobby behavior. A bot-level integration test is still needed to verify Discord effects.
 - Do not infer that `/maketeams` exists from old help text. The current team-splitting command is `/scrimmage`; LAN fun commands are registered from `LanFunModule`.
 
 ## CS2 / Source RCON (implemented)
