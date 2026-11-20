@@ -6,7 +6,7 @@ using Discord.Interactions;
 namespace ABILanBot.Modules;
 
 [Group("cs2", "Status og administrasjon av Bouvet-LAN CS2-serveren")]
-[EnabledInDm(false)]
+[CommandContextType(InteractionContextType.Guild)]
 public sealed class Cs2Module : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly Cs2RconService _rcon;
