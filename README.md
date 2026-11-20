@@ -49,10 +49,13 @@ Slash commands register to the configured LAN guild when the bot starts. They ar
 6. Build and run:
 
    ```bash
-   dotnet restore
-   dotnet build --configuration Release
-   dotnet test --configuration Release --no-build
-   dotnet run
+   # From the ABILanBot directory, build and test the entire solution.
+   dotnet restore ../ABILanBot.sln
+   dotnet build ../ABILanBot.sln --configuration Release --no-restore
+   dotnet test ../ABILanBot.sln --configuration Release --no-build
+
+   # Run from ABILanBot so appsettings.json is found.
+   dotnet run --no-restore
    ```
 
 Guild-specific slash commands register using `Discord:GuildId` in appsettings.json. Updates usually become available shortly after the bot reconnects.
@@ -71,5 +74,5 @@ Never commit appsettings.json or a real Discord token. The .gitignore excludes l
 
 ## Development
 
-The bot's slash commands live in Modules, with reusable logic and service registration in Services. `LanFunService` is stateless and needs no external API. `ABILanBot.Tests` verifies game choices, challenge categories, bingo invariants, Discord intent options and slash command dependency resolution. Run all checks with `dotnet test`.
+The bot's slash commands live in Modules, with reusable logic and service registration in Services. `LanFunService` is stateless and needs no external API. `ABILanBot.Tests` verifies game choices, challenge categories, bingo invariants, Discord intent options and slash command dependency resolution. From the `ABILanBot` directory, run the entire solution test suite with `dotnet test ../ABILanBot.sln` (or run `dotnet test ABILanBot.sln` from the repository root).
 
