@@ -13,7 +13,7 @@ dotnet build ABILanBot.sln -c Release --no-restore
 dotnet test ABILanBot.sln -c Release --no-build
 ```
 
-The application and test project target `net10.0`. PR #7 merged on 2026-11-20 and introduced `ABILanBot.Tests` (MSTest) plus `.github/workflows/dotnet.yml`, which restores, builds and runs `dotnet test` on pushes to `main` and pull requests. Verify test discovery and actual CI outcomes rather than assuming that defining a workflow proves it passed. The existing tests exercise configuration and LAN-fun logic; they do **not** establish coverage for all Discord commands or live integrations. For docs-only changes, also check links and referenced file paths.
+The application and test project target `net10.0`. PR #7 merged on 2026-11-20 and introduced `ABILanBot.Tests` (MSTest) plus `.github/workflows/dotnet.yml`, which restores, builds and runs `dotnet test` on pushes to `main` and pull requests. Verify test discovery and actual CI outcomes rather than assuming that defining a workflow proves it passed. The existing tests exercise configuration, LAN-fun logic, and a loopback fake RCON status exchange; they do **not** establish coverage for all Discord commands, administrative RCON flows, or live integrations. For docs-only changes, also check links and referenced file paths.
 
 ## Select checks based on what changed
 
@@ -24,7 +24,7 @@ The application and test project target `net10.0`. PR #7 merged on 2026-11-20 an
 | Team allocation or pure logic | Release build + MSTest tests | Add deterministic unit tests for affected behavior when not already covered |
 | Discord interaction/module | Release build | Explicitly authorized sandbox guild: command registration, permissions, error and happy paths |
 | Voice moves or channel cleanup | Release build | Fake/mocked operation first; approved test guild with members/channels created for the test |
-| Future CS2 RCON | Release build | Fake RCON client, command allowlist and auth tests; approved non-production server only |
+| CS2 RCON service or slash commands | Restore + Release build + discovered MSTest tests (including `Cs2RconServiceTests`) | Extend fake-server tests for changed auth/packet/command behavior; manual checks only against an explicitly approved non-production server |
 
 ## Live execution is opt-in
 
@@ -32,7 +32,7 @@ The bot is a live Discord client, not a harmless local CLI:
 
 1. Create `ABILanBot/appsettings.json` from the example without committing the populated file.
 2. Run from the `ABILanBot/` directory (`dotnet run`) **only** when there is explicit authorization and a test guild, because startup connects to Discord and registers commands in the guild set by `Discord:GuildId`.
-3. Do not use a production Discord guild or CS2 server as an automated test environment. In particular, do not test forced channel deletion or RCON commands against real users.
+3. Do not use a production Discord guild or CS2 server as an automated test environment. In particular, do not test forced channel deletion or RCON commands against real users. The existing RCON test uses a loopback TCP fake and must remain isolated.
 4. Document the guild/server scope used, observable results (without secrets), cleanup, and any limitations.
 
 ## Reporting and next gap

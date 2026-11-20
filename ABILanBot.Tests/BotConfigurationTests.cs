@@ -41,6 +41,33 @@ public sealed class BotConfigurationTests
     }
 
     [TestMethod]
+    public void StartupValidationChecksTokenAndGuild()
+    {
+        Assert.ThrowsExactly<InvalidOperationException>(
+            () => StartupConfigurationValidator.Validate(Config(("Discord:GuildId", "123"))));
+        StartupConfigurationValidator.Validate(Config(
+            ("Discord:GuildId", "123"),
+            ("Discord:Token", "ci-test-token-not-real")));
+    }
+
+    [TestMethod]
+    public void StartupValidationAcceptsJsonComments()
+    {
+        const string json = """
+            {
+              // A valid JSON comment supported by the .NET configuration provider.
+              "Discord": {
+                "Token": "ci-test-token-not-real",
+                "GuildId": "123"
+              }
+            }
+            """;
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
+        var config = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        StartupConfigurationValidator.Validate(config);
+    }
+
+    [TestMethod]
     public void GuildIdMustBeConfigured()
     {
         Assert.AreEqual(1439887410107519087UL,

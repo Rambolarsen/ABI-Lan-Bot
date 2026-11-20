@@ -31,7 +31,8 @@ dotnet build ABILanBot.sln -c Release --no-restore
 - `ABILanBot/Services/BotServiceRegistration.cs`: dependency injection registrations shared by production and tests.
 - `ABILanBot/Services/BotConfiguration.cs`: validated Discord guild and message-content settings.
 - `ABILanBot/Modules/`: Discord slash-command entry points and user-facing responses.
-- `ABILanBot/Services/`: team selection, member/channel operations and HTTP clients.
+- `ABILanBot/Services/`: team selection, member/channel operations, HTTP clients, and CS2 RCON.
+- `ABILanBot/Modules/Cs2Module.cs` and `ABILanBot/Services/Cs2RconService.cs`: authorized CS2 commands and Source RCON transport. Read [architecture](docs/architecture.md) and [verification](docs/verification.md) before changing this boundary.
 - `ABILanBot/Entities/`: result/data types.
 - `ABILanBot/appsettings.example.json`: public, non-secret configuration examples.
 
@@ -39,7 +40,7 @@ Prefer services for reusable behavior and thin interaction modules. Do not intro
 
 ## Safety and completion contract
 
-- Treat Discord member moves, channel creation/deletion, guild configuration and future CS2 RCON commands as **live side effects**. Do not exercise them against a real guild/server without explicit authorization; prefer isolated tests and stubs.
+- Treat Discord member moves, channel creation/deletion, guild configuration and CS2 RCON commands as **live side effects**. Do not exercise them against a real guild/server without explicit authorization; prefer isolated tests and stubs.
 - For any new destructive or administrative command, design authorization, scope and failure behavior first. Never accept arbitrary privileged commands from general Discord users. RCON credentials must stay server-side and outside committed configuration.
 - Do not silently merge PRs, force-push, delete channels, or alter live infrastructure as part of ordinary development.
 - Before proposing completion, describe the change, checks actually executed (pass/fail/not run), residual risks, and how to revert. If blocked by missing SDK, token or access, state that explicitly rather than claiming validation.

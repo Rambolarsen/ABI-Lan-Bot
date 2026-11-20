@@ -22,3 +22,53 @@ jobs:
         run: dotnet build ABILanBot.sln --configuration Release --no-restore
       - name: Test
         run: dotnet test ABILanBot.sln --configuration Release --no-build
+
+  windows-launcher:
+    name: Windows launcher validation
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Parse PowerShell launcher
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Join-Path $PWD 'start-bot.ps1'), [ref]$tokens, [ref]$errors)
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+      - name: Validate launcher happy path
+        shell: pwsh
+        run: |
+          $configPath = 'ABILanBot/appsettings.json'
+          try {
+            @{
+              Discord = @{ Token = 'ci-test-token-not-real'; GuildId = '1439887410107519087' }
+              GameLobbyChannelName = 'General'
+            } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $configPath
+            Add-Content -LiteralPath $configPath -Value '// JSONC comment supported by .NET'
+            # The batch file uses Windows PowerShell 5.1. Invoke exactly that runtime.
+            # Disable pwsh's native command nonzero-exit auto-throw for the negative test.
+            $PSNativeCommandUseErrorActionPreference = $false
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./start-bot.ps1 -ValidateOnly -SkipRconPrompt
+            if ($LASTEXITCODE -ne 0) { throw "Expected validation success; got $LASTEXITCODE" }
+            # Exercise the actual double-click batch entry point and argument forwarding.
+            $launcher = (Resolve-Path 'Start ABI LAN Bot.cmd').Path
+            & $launcher -ValidateOnly -SkipRconPrompt
+            if ($LASTEXITCODE -ne 0) { throw "Batch launcher validation failed: $LASTEXITCODE" }
+
+            @{ Discord = @{ Token = 'ci-test-token-not-real'; GuildId = 'invalid' } } |
+              ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $configPath
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./start-bot.ps1 -ValidateOnly -SkipRconPrompt
+            if ($LASTEXITCODE -eq 0) { throw 'Expected validation to fail for invalid guild ID' }
+            # GitHub's pwsh wrapper exits with LASTEXITCODE if left nonzero.
+            $global:LASTEXITCODE = 0
+          }
+          finally {
+            Remove-Item -LiteralPath $configPath -ErrorAction SilentlyContinue
+          }
