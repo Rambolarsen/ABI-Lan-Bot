@@ -143,7 +143,8 @@ the repository, `appsettings.example.json`, or Discord messages.
 For local testing, in PowerShell (the value remains private in this example):
 
 ```powershell
-$env:CS2_RCON_PASSWORD = Read-Host "Spillvert RCON password"
+$secret = Read-Host "Spillvert RCON password" -AsSecureString
+$env:CS2_RCON_PASSWORD = [System.Net.NetworkCredential]::new("", $secret).Password
 dotnet run --project ABILanBot
 ```
 
