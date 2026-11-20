@@ -20,3 +20,5 @@ jobs:
         run: dotnet restore ABILanBot.sln
       - name: Build
         run: dotnet build ABILanBot.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test ABILanBot.sln --configuration Release --no-build

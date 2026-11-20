@@ -35,20 +35,27 @@ Slash commands register to the configured LAN guild when the bot starts. They ar
 
 1. Clone the repository and open the application directory:
 
+   ```bash
    git clone https://github.com/Rambolarsen/ABI-Lan-Bot.git
    cd ABI-Lan-Bot/ABILanBot
+   ```
 
 2. Copy appsettings.example.json to appsettings.json.
-3. Add your bot token under Discord:Token and set GameLobbyChannelName to the name of your lobby voice channel.
-4. In the Discord Developer Portal, enable the Message Content privileged intent for the legacy ! text commands. For slash commands alone, that intent is not needed.
+3. Set `Discord:Token` to the bot token, `Discord:GuildId` to your Discord server ID, and `GameLobbyChannelName` to the lobby voice channel. The example guild ID belongs to the original ABI LAN server; replace it for other servers.
+4. To use `!` commands, enable the privileged **Message Content Intent** in the Discord Developer Portal and set `Discord:EnableMessageContentIntent` to `true` (the default). For a slash-only bot set it to `false`. The bot will not request that privileged intent or process text commands.
+
+   **Upgrade note:** Existing installations must add `Discord:GuildId` to their local appsettings.json before deploying this branch.
 5. Invite the bot with bot and applications.commands OAuth2 scopes. Give it View Channels and Send Messages for responses. For team splitting and cleanup, also grant Move Members and Manage Channels.
 6. Build and run:
 
+   ```bash
    dotnet restore
    dotnet build --configuration Release
+   dotnet test --configuration Release --no-build
    dotnet run
+   ```
 
-Note: The Discord guild ID used for slash-command registration is currently defined in Program.cs; change it if you are deploying to a different server. Once connected, Discord may take a short time to display new slash commands.
+Guild-specific slash commands register using `Discord:GuildId` in appsettings.json. Updates usually become available shortly after the bot reconnects.
 
 ## Dependencies
 
@@ -56,7 +63,7 @@ Note: The Discord guild ID used for slash-command registration is currently defi
 - Microsoft.Extensions.Configuration, .Json, .DependencyInjection and .Http **10.0.15**
 - Target framework: **net10.0**
 
-GitHub Actions verifies restore and build on pull requests. Dependabot checks NuGet packages and workflow actions weekly.
+GitHub Actions verifies restore, build and automated tests on pull requests. Dependabot checks NuGet packages and workflow actions weekly.
 
 ## Security
 
@@ -64,5 +71,5 @@ Never commit appsettings.json or a real Discord token. The .gitignore excludes l
 
 ## Development
 
-The bot's Discord slash commands live in Modules, while reusable logic is in Services. LanFunService is stateless and needs no external API.
+The bot's slash commands live in Modules, with reusable logic and service registration in Services. `LanFunService` is stateless and needs no external API. `ABILanBot.Tests` verifies game choices, challenge categories, bingo invariants, Discord intent options and slash command dependency resolution. Run all checks with `dotnet test`.
 
