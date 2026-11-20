@@ -1,110 +1,80 @@
 # ABI-Lan-Bot
 
-A Discord bot built with .NET 10 and Discord.Net.
+A Discord LAN party bot built with .NET 10 LTS and Discord.Net. It creates randomized teams and makes game night a little more chaotic.
 
-## Features
+## Commands
 
-- **Ping Command**: Check if the bot is responsive with `!ping`
-- **Help Command**: Display available commands with `!help`
-- **Info Command**: Show bot information with `!info`
+### LAN fun (slash commands)
+
+- **/gamepick** — Randomly choose the next game from CS2, AoE2, Rocket League, Golf With Your Friends, Overcooked and Mario Kart.
+  - Optional games parameter: a comma-separated list of 2–20 custom game names, e.g. CS2, Rocket League, Mario Kart.
+- **/challenge** — Get a friendly randomized party challenge. Optionally choose a game category.
+- **/lanbingo** — Get a randomized 3x3 bingo card with a free center square. Run again for a new card.
+- **/dadjoke** — Get a random dad joke (requires an internet connection).
+
+### Teams and voice channels (slash commands)
+
+- **/scrimmage** — Split members of the configured lobby into random teams (optionally move them).
+- **/returntolobby** — Move people from bot-created game room voice channels back into the lobby.
+- **/cleanupchannels** — Remove empty bot-created game room voice channels (optional force-delete).
+
+### Text commands
+
+- **!ping** — Check if the bot is alive.
+- **!help** — Display command help.
+- **!info** — Display bot and runtime information.
+
+Slash commands register to the configured LAN guild when the bot starts. They are not text commands.
 
 ## Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later
-- A Discord Bot Token (see setup instructions below)
-
-## Getting Your Discord Bot Token
-
-1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
-2. Click "New Application" and give it a name
-3. Go to the "Bot" section in the left sidebar
-4. Click "Add Bot" and confirm
-5. Under the TOKEN section, click "Copy" to copy your bot token
-6. Enable "MESSAGE CONTENT INTENT" under Privileged Gateway Intents
-7. Go to OAuth2 > URL Generator
-8. Select scopes: `bot`
-9. Select bot permissions: `Send Messages`, `Read Messages/View Channels`, `Read Message History`
-10. Copy the generated URL and open it in your browser to invite the bot to your server
+- .NET **10** SDK and runtime, kept current with .NET 10 LTS security patches.
+- A Discord application and bot token.
 
 ## Setup
 
-1. Clone this repository:
+1. Clone the repository and open the application directory:
+
    ```bash
    git clone https://github.com/Rambolarsen/ABI-Lan-Bot.git
-   cd ABI-Lan-Bot
+   cd ABI-Lan-Bot/ABILanBot
    ```
 
-2. Navigate to the project directory:
+2. Copy appsettings.example.json to appsettings.json.
+3. Set `Discord:Token` to the bot token, `Discord:GuildId` to your Discord server ID, and `GameLobbyChannelName` to the lobby voice channel. The example guild ID belongs to the original ABI LAN server; replace it for other servers.
+4. To use `!` commands, enable the privileged **Message Content Intent** in the Discord Developer Portal and set `Discord:EnableMessageContentIntent` to `true` (the default). For a slash-only bot set it to `false`. The bot will not request that privileged intent or process text commands.
+
+   **Upgrade note:** Existing installations must add `Discord:GuildId` to their local appsettings.json before deploying this branch.
+5. Invite the bot with bot and applications.commands OAuth2 scopes. Give it View Channels and Send Messages for responses. For team splitting and cleanup, also grant Move Members and Manage Channels.
+6. Build and run:
+
    ```bash
-   cd ABILanBot
+   # From the ABILanBot directory, build and test the entire solution.
+   dotnet restore ../ABILanBot.sln
+   dotnet build ../ABILanBot.sln --configuration Release --no-restore
+   dotnet test ../ABILanBot.sln --configuration Release --no-build
+
+   # Run from ABILanBot so appsettings.json is found.
+   dotnet run --no-restore
    ```
 
-3. Create an `appsettings.json` file from the example:
-   ```bash
-   cp appsettings.example.json appsettings.json
-   ```
-
-4. Edit `appsettings.json` and add your Discord bot token:
-   ```json
-   {
-     "Discord": {
-       "Token": "YOUR_BOT_TOKEN_HERE"
-     }
-   }
-   ```
-
-5. Build the project:
-   ```bash
-   dotnet build
-   ```
-
-6. Run the bot:
-   ```bash
-   dotnet run
-   ```
-
-## Usage
-
-Once the bot is running and invited to your server, you can use these commands:
-
-- `!ping` - The bot will respond with "Pong! 🏓"
-- `!help` - Displays all available commands
-- `!info` - Shows information about the bot
-
-## Project Structure
-
-```
-ABILanBot/
-├── ABILanBot.csproj          # Project file with dependencies
-├── Program.cs                 # Main bot implementation
-├── appsettings.example.json  # Configuration template
-└── appsettings.json          # Your configuration (not in git)
-```
+Guild-specific slash commands register using `Discord:GuildId` in appsettings.json. Updates usually become available shortly after the bot reconnects.
 
 ## Dependencies
 
-- **Discord.Net** (3.16.0) - Discord API wrapper for .NET
-- **Microsoft.Extensions.Configuration** (8.0.0) - Configuration framework
-- **Microsoft.Extensions.Configuration.Json** (8.0.0) - JSON configuration provider
+- Discord.Net **3.20.2**
+- Microsoft.Extensions.Configuration, .Json, .DependencyInjection and .Http **10.0.15**
+- Target framework: **net10.0**
 
-## Development
-
-To modify the bot:
-
-1. Edit `Program.cs` to add new commands or features
-2. Build and test your changes:
-   ```bash
-   dotnet build
-   dotnet run
-   ```
+GitHub Actions verifies restore, build and automated tests on pull requests. Dependabot checks NuGet packages and workflow actions weekly.
 
 ## Security
 
-**Important**: Never commit your `appsettings.json` file with your actual bot token to version control. The token is like a password to your bot. The `.gitignore` file is configured to exclude this file.
+Never commit appsettings.json or a real Discord token. The .gitignore excludes local configuration.
 
-## License
+## Development
 
-This project is open source and available under the MIT License.
+The bot's slash commands live in Modules, with reusable logic and service registration in Services. `LanFunService` is stateless and needs no external API. `ABILanBot.Tests` verifies game choices, challenge categories, bingo invariants, Discord intent options and slash command dependency resolution. From the `ABILanBot` directory, run the entire solution test suite with `dotnet test ../ABILanBot.sln` (or run `dotnet test ABILanBot.sln` from the repository root).
 
 ## CS2 server controls (Spillvert)
 
@@ -145,7 +115,7 @@ For local testing, in PowerShell (the value remains private in this example):
 ```powershell
 $secret = Read-Host "Spillvert RCON password" -AsSecureString
 $env:CS2_RCON_PASSWORD = [System.Net.NetworkCredential]::new("", $secret).Password
-dotnet run --project ABILanBot
+dotnet run --no-restore
 ```
 
 The password environment variable must also be configured wherever the bot
