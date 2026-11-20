@@ -41,6 +41,7 @@ class Program
 		services.AddSingleton<TeamService>();
 		services.AddSingleton<VoiceChannelService>();
 		services.AddSingleton<MemberService>();
+		services.AddSingleton<Cs2RconService>();
 		services.AddSingleton<TeamsModule>();
 		services.AddHttpClient<DadJokeService>();
 
