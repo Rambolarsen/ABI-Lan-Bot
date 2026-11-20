@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [switch]$NoRestart,
-    [switch]$SkipRconPrompt
+    [switch]$SkipRconPrompt,
+    [switch]$ValidateOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -46,6 +47,11 @@ try {
 }
 if ($LASTEXITCODE -ne 0 -or @($sdks | Where-Object { $_ -match '^10\.' }).Count -eq 0) {
     Stop-WithError 'Install .NET 10 SDK: https://dotnet.microsoft.com/download/dotnet/10.0'
+}
+
+if ($ValidateOnly) {
+    Write-Host "[ABI LAN Bot] Startup configuration and .NET 10 SDK validated." -ForegroundColor Green
+    return
 }
 
 # Do not persist passwords. RCON is optional; other bot features work without it.

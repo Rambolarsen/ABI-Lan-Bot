@@ -15,7 +15,7 @@ Run the bot only during LAN events. No Docker, Windows service or VPS required.
 
 The launcher validates the local configuration and installed .NET 10 SDK, builds Release, launches from the correct working directory, and restarts the bot after it exits with a five-second delay.
 
-For troubleshooting, use `./start-bot.ps1 -NoRestart` to disable retries or `-SkipRconPrompt` to skip the CS2 password prompt. The script does not print or save credentials. Avoid running multiple copies at the same time.
+For troubleshooting, use `./start-bot.ps1 -NoRestart` to disable retries, `-SkipRconPrompt` to skip the CS2 password prompt, or `-ValidateOnly` to check configuration and the .NET 10 SDK without launching the bot. GitHub Actions runs validation checks on a Windows runner. The script does not print or save credentials. Avoid running multiple copies at the same time.
 
 **Important:** GitHub Actions does not deploy the bot. Update the checkout on the personal PC containing your local `appsettings.json` before running it.
 
