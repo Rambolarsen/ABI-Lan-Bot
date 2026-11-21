@@ -148,6 +148,29 @@ class Program
         }
 	}
 
+    private async Task LogCs2HealthAsync()
+    {
+        if (_configuration is null || _serviceProvider is null ||
+            string.IsNullOrWhiteSpace(_configuration["Cs2:Host"]))
+            return;
+
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("CS2_RCON_PASSWORD")))
+        {
+            Console.WriteLine("[Health] CS2 configured but RCON password not supplied; controls disabled.");
+            return;
+        }
+
+        try
+        {
+            await _serviceProvider.GetRequiredService<Cs2RconService>().GetStatusAsync();
+            Console.WriteLine("[Health] CS2 RCON authentication and status check OK.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[Health] CS2 RCON check failed: {ex.GetType().Name}. Use /cs2 status to diagnose.");
+        }
+    }
+
 	private async Task MessageReceivedAsync(SocketMessage message)
 	{
 		// Don't respond to bot messages
