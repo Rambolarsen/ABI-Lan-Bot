@@ -13,6 +13,8 @@ public sealed class LanPollService
     {
         ValidateHours(timer);
         var choices = _fun.GetGameOptions(games);
+        if (choices.Count > 10)
+            throw new ArgumentException("Discord støtter maks 10 alternativer i én avstemning.");
         return CreatePoll("🎮 Hva spiller vi neste gang?", choices, timer);
     }
 
