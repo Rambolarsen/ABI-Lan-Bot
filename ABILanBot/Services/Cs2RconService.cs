@@ -6,6 +6,12 @@ using Microsoft.Extensions.Configuration;
 
 namespace ABILanBot.Services;
 
+public enum Cs2MatchPreset
+{
+    Warmup,
+    Competitive
+}
+
 public enum Cs2GameMode
 {
     ArmsRace,
@@ -71,6 +77,25 @@ public sealed class Cs2RconService
         finally
         {
             _adminLock.Release();
+        }
+    }
+
+    /// <summary>Curated commands only; never accept raw RCON input from Discord.</summary>
+    public async Task ApplyPresetAsync(Cs2MatchPreset preset)
+    {
+        switch (preset)
+        {
+            case Cs2MatchPreset.Warmup:
+                await _adminLock.WaitAsync();
+                try { await ExecuteAsync("mp_warmup_start"); }
+                finally { _adminLock.Release(); }
+                break;
+            case Cs2MatchPreset.Competitive:
+                // SetModeAsync serializes all mode changes and loads the competitive map.
+                await SetModeAsync(Cs2GameMode.Competitive);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(preset));
         }
     }
 

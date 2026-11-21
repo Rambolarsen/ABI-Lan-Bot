@@ -15,7 +15,7 @@ Run the bot only during LAN events. No Docker, Windows service or VPS required.
 
 The launcher verifies the .NET 10 SDK, builds Release, validates configuration using the application's JSON parser (including JSON comments), launches from the correct working directory, and restarts the bot after a nonzero exit with a five-second delay. Normal clean exits do not restart.
 
-For troubleshooting, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start-bot.ps1 -NoRestart` to disable retries, or use `-SkipRconPrompt` to skip the CS2 password prompt and `-ValidateOnly` to check configuration and the .NET 10 SDK without launching the bot. The double-click `.cmd` launcher also forwards these switches when run from a terminal. GitHub Actions runs validation checks on a Windows runner. The script does not print or save credentials. Avoid running multiple copies at the same time.
+For troubleshooting, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start-bot.ps1 -NoRestart` to disable retries, or use `-SkipRconPrompt` to skip the CS2 password prompt and `-ValidateOnly` to check configuration and the .NET 10 SDK without launching the bot. The double-click `.cmd` launcher also forwards these switches when run from a terminal. GitHub Actions runs validation checks on a Windows runner. Poll votes are held by Discord, not the local process. The script does not print or save credentials. Avoid running multiple copies at the same time.
 
 **Important:** GitHub Actions does not deploy the bot. Update the checkout on the personal PC containing your local `appsettings.json` before running it.
 
@@ -37,6 +37,14 @@ For troubleshooting, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -Fil
   - Alternativer (sjekket mot Wolts publiserte leveringsmenyer for Sandvika 20. november 2026): Domino's Pizza Sandvika, Sandvika Pizza og Kebab, EL GRECO Sandvika, WU Restaurant Sandvika, Zouq Sandvika, El Camino Sandvika og Steam & Stir.
   - Botmeldingen viser lenker til menyene. Alle får én stemme og kan endre denne før fristen. Discord holder orden på stemmene og avslutter avstemningen.
   - **Viktig:** Levering må bekreftes for LAN-lokalets konkrete adresse og klokkeslett ved bestilling. Listen er kuratert, ikke en sanntidssjekk. Botten bestiller ikke mat og avgjør ikke stemmelikhet automatisk.
+
+### LAN game voting and awards (guild slash commands)
+
+- **/spill stem** — start a native Discord poll for the next game. Optional `timer` (1–24 hours, default 1) and `spill` (2–10 comma-separated game names). Uses the same default games as `/gamepick`. Every voter gets one changeable vote.
+- **/award nominer** — participants privately nominate one person for **Årets gamer** (`deltaker`). Repeating the command replaces their nomination. Nominees persist in the local `ABILanBot/data/award-nominations.json` file across bot restarts.
+- **/award stem** — an organizer with **Manage Server** permission creates the final **Årets gamer** poll from stored nominees (2–10 unique names). Optionally override with `nominerte` (comma-separated names); `timer` is 1–24 hours. Nominees cannot be added to an already posted poll. No award category needs to be entered.
+- Discord manages votes and expiry, so a bot restart does **not** erase active polls. Award nominations are additionally saved on local disk; keep the `data` folder when updating the checkout. No external database is needed.
+- Permissions: game voting is available to LAN members; award poll creation requires Manage Server. Both require **Create Polls** for the bot; neither is published to DMs.
 
 ### Teams and voice channels (slash commands)
 
@@ -121,6 +129,8 @@ Commands:
 - `/cs2 mode Casual` — sets `game_type 0` / `game_mode 0` and loads `de_mirage`.
 - `/cs2 mode Competitive` — sets `game_type 0` / `game_mode 1` and loads `de_mirage`.
 - `/cs2 map de_mirage` — changes to a named installed map.
+- `/cs2 preset Warmup` — starts warmup on the current map (requires `bekreft: true`).
+- `/cs2 preset Competitive` — switches to competitive mode and reloads de_mirage (requires `bekreft: true`).
 - `/cs2 restartmatch` — restarts the **match**, not the server process.
 
 All commands except `status` require Discord **Manage Server** permission.
