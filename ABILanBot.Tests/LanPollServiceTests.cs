@@ -24,6 +24,7 @@ public sealed class LanPollServiceTests
         Assert.AreEqual(2, poll.Answers.Count);
         Assert.ThrowsExactly<ArgumentException>(() => _polls.CreateGamePoll(25));
         Assert.ThrowsExactly<ArgumentException>(() => _polls.CreateGamePoll(1, "CS2"));
+        Assert.ThrowsExactly<ArgumentException>(() => _polls.CreateGamePoll(1, "A,B,C,D,E,F,G,H,I,J,K"));
     }
 
     [TestMethod]
