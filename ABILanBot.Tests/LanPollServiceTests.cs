@@ -1,4 +1,5 @@
 using ABILanBot.Services;
+using ABILanBot.Modules;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ABILanBot.Tests;
@@ -28,9 +29,21 @@ public sealed class LanPollServiceTests
     }
 
     [TestMethod]
+    public void OnlyAwardIsAaretsGamerAndCommandsRequireNoCategory()
+    {
+        Assert.AreEqual("Årets gamer", AwardModule.AwardName);
+        var nominate = typeof(AwardModule).GetMethod(nameof(AwardModule.NominateAsync))!;
+        var vote = typeof(AwardModule).GetMethod(nameof(AwardModule.VoteAsync))!;
+        CollectionAssert.AreEqual(new[] { "deltaker" },
+            nominate.GetParameters().Select(p => p.Name).ToArray());
+        CollectionAssert.AreEqual(new[] { "nominerte", "timer" },
+            vote.GetParameters().Select(p => p.Name).ToArray());
+    }
+
+    [TestMethod]
     public void AwardPollNeedsDistinctSafeNominees()
     {
-        var poll = _polls.CreateAwardPoll("MVP", "Alice, Bob, Charlie");
+        var poll = _polls.CreateAwardPoll(AwardModule.AwardName, "Alice, Bob, Charlie");
         Assert.AreEqual(3, poll.Answers.Count);
         Assert.ThrowsExactly<ArgumentException>(() => _polls.CreateAwardPoll("MVP", "Alice, alice"));
         Assert.ThrowsExactly<ArgumentException>(() => _polls.CreateAwardPoll("MVP", "@everyone, Bob"));
