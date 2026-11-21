@@ -8,6 +8,7 @@ namespace ABILanBot.Modules;
 [CommandContextType(InteractionContextType.Guild)]
 public sealed class AwardModule : InteractionModuleBase<SocketInteractionContext>
 {
+    public const string AwardName = "Årets gamer";
     private readonly LanPollService _polls;
     private readonly AwardNominationService _nominations;
 
@@ -17,15 +18,14 @@ public sealed class AwardModule : InteractionModuleBase<SocketInteractionContext
         _nominations = nominations;
     }
 
-    [SlashCommand("nominer", "Nominer en deltaker til en LAN-pris")]
+    [SlashCommand("nominer", "Nominer en deltaker til Årets gamer")]
     public async Task NominateAsync(
-        [Summary("pris", "For eksempel MVP eller LAN Clown")] string pris,
         [Summary("deltaker", "Navnet på deltakeren")] string deltaker)
     {
         try
         {
-            await _nominations.NominateAsync(Context.Guild.Id, Context.User.Id, pris, deltaker);
-            await RespondAsync($"🏆 Nominasjonen til **{pris}** er registrert. Du kan endre den ved å nominere på nytt.",
+            await _nominations.NominateAsync(Context.Guild.Id, Context.User.Id, AwardName, deltaker);
+            await RespondAsync($"🏆 Nominasjonen til **{AwardName}** er registrert. Du kan endre den ved å nominere på nytt.",
                 ephemeral: true, allowedMentions: AllowedMentions.None);
         }
         catch (ArgumentException ex)
@@ -39,10 +39,9 @@ public sealed class AwardModule : InteractionModuleBase<SocketInteractionContext
     }
 
 
-    [SlashCommand("stem", "Start avstemning om LAN-pris blant nominerte")]
+    [SlashCommand("stem", "Start avstemning om Årets gamer blant nominerte")]
     [RequireUserPermission(GuildPermission.ManageGuild)]
     public async Task VoteAsync(
-        [Summary("pris", "For eksempel MVP, Biggest Throw eller LAN Clown")] string pris,
         [Summary("nominerte", "Valgfri overstyring: 2–10 navn atskilt med komma")] string? nominerte = null,
         [Summary("timer", "Varighet i timer, 1–24")] int timer = 1)
     {
@@ -50,9 +49,9 @@ public sealed class AwardModule : InteractionModuleBase<SocketInteractionContext
         {
             var names = nominerte;
             if (string.IsNullOrWhiteSpace(names))
-                names = string.Join(", ", await _nominations.GetNomineesAsync(Context.Guild.Id, pris));
-            var poll = _polls.CreateAwardPoll(pris, names, timer);
-            await RespondAsync("🏆 **LAN Awards!** Stem på én nominert. Resultatet vises i Discord når avstemningen slutter.",
+                names = string.Join(", ", await _nominations.GetNomineesAsync(Context.Guild.Id, AwardName));
+            var poll = _polls.CreateAwardPoll(AwardName, names, timer);
+            await RespondAsync("🏆 **Årets gamer!** Stem på én nominert. Resultatet vises i Discord når avstemningen slutter.",
                 poll: poll, allowedMentions: AllowedMentions.None);
         }
         catch (ArgumentException ex)
