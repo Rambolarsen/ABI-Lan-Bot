@@ -19,7 +19,7 @@ public sealed class CommandRegistrationPlanTests
             CommandRegistrationPlan.GlobalModuleTypes.ToArray());
 
         CollectionAssert.AreEquivalent(
-            new[] { typeof(TeamsModule), typeof(Cs2Module), typeof(FoodModule) },
+            new[] { typeof(TeamsModule), typeof(Cs2Module), typeof(FoodModule), typeof(GameVoteModule), typeof(AwardModule) },
             CommandRegistrationPlan.GuildModuleTypes.ToArray());
     }
 
