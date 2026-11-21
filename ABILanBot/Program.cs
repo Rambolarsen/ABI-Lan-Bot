@@ -177,6 +177,7 @@ class Program
                     "• `/lanbingo` - Generate a LAN bingo card\n" +
                     "• `/mat stem` - Stem på hvor vi bestiller middag fra\n" +
                     "• `/spill stem` - Stem på neste spill\n" +
+                    "• `/award nominer` - Nominer en spiller\n" +
                     "• `/award stem` - Start prisavstemning (arrangør)\n" +
                     "• `/cs2 preset` - Warmup eller competitive (arrangør)"
 			);
