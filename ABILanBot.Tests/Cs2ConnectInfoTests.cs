@@ -38,12 +38,33 @@ public sealed class Cs2ConnectInfoTests
     }
 
     [TestMethod]
-    public void PasswordIsOptionalForPublicServers()
+    public void MissingPasswordUsesBouvetLanDefault()
     {
-        var config = Config(("Cs2:Host", "server.example.com"), ("Cs2:Port", "27015"));
+        // This is the shape of a previously deployed appsettings.json.
+        var config = Config(("Cs2:Host", "oslo21.spillvert.no"), ("Cs2:Port", "27020"));
         var join = Cs2ConnectInfo.GetJoinInfo(config);
-        Assert.AreEqual("server.example.com:27015", join.Address);
-        Assert.IsNull(join.Password);
+        Assert.AreEqual("oslo21.spillvert.no:27020", join.Address);
+        Assert.AreEqual("bouvet", join.Password);
+    }
+
+    [TestMethod]
+    public void ExplicitlyBlankPasswordDoesNotMisrepresentPasswordProtectedServer()
+    {
+        var config = Config(
+            ("Cs2:Host", "oslo21.spillvert.no"),
+            ("Cs2:Port", "27020"),
+            ("Cs2:JoinPassword", ""));
+        Assert.ThrowsExactly<InvalidOperationException>(() => Cs2ConnectInfo.GetJoinInfo(config));
+    }
+
+    [TestMethod]
+    public void ExplicitJoinPasswordCanBeChanged()
+    {
+        var config = Config(
+            ("Cs2:Host", "oslo21.spillvert.no"),
+            ("Cs2:Port", "27020"),
+            ("Cs2:JoinPassword", "new_join_password"));
+        Assert.AreEqual("new_join_password", Cs2ConnectInfo.GetJoinInfo(config).Password);
     }
 
     [DataTestMethod]
@@ -61,6 +82,35 @@ public sealed class Cs2ConnectInfoTests
             ("Cs2:JoinPort", port),
             ("Cs2:JoinPassword", password));
         Assert.ThrowsExactly<InvalidOperationException>(() => Cs2ConnectInfo.GetJoinInfo(config));
+    }
+
+    [TestMethod]
+    public void DiscordHowToExplainsConsoleAndIncludesRequiredPassword()
+    {
+        var config = Config(
+            ("Cs2:Host", "oslo21.spillvert.no"),
+            ("Cs2:Port", "27020"));
+        var instructions = Cs2ConnectInfo.BuildDiscordHowTo(config);
+
+        StringAssert.Contains(instructions, "Slik kobler du til");
+        StringAssert.Contains(instructions, "Aktiver utviklerkonsoll");
+        StringAssert.Contains(instructions, "Start **Counter-Strike 2**");
+        StringAssert.Contains(instructions, "password bouvet; connect oslo21.spillvert.no:27020");
+        StringAssert.Contains(instructions, "Spillpassord: `bouvet`");
+        Assert.IsFalse(instructions.Contains("CS2_RCON_PASSWORD", StringComparison.Ordinal));
+        Assert.IsFalse(instructions.Contains("Ikke nødvendig", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void DiscordHowToRespectsConfiguredJoinEndpointAndPassword()
+    {
+        var config = Config(
+            ("Cs2:JoinHost", "cs2.example.org"),
+            ("Cs2:JoinPort", "27015"),
+            ("Cs2:JoinPassword", "friends"));
+        var instructions = Cs2ConnectInfo.BuildDiscordHowTo(config);
+
+        StringAssert.Contains(instructions, "password friends; connect cs2.example.org:27015");
     }
 
     [TestMethod]
