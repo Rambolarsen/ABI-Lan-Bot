@@ -175,7 +175,10 @@ class Program
                     "• `/gamepick` - Randomly pick the next game\n" +
                     "• `/challenge` - Get a LAN party challenge\n" +
                     "• `/lanbingo` - Generate a LAN bingo card\n" +
-                    "• `/mat stem` - Stem på hvor vi bestiller middag fra"
+                    "• `/mat stem` - Stem på hvor vi bestiller middag fra\n" +
+                    "• `/spill stem` - Stem på neste spill\n" +
+                    "• `/award stem` - Start prisavstemning (arrangør)\n" +
+                    "• `/cs2 preset` - Warmup eller competitive (arrangør)"
 			);
 		}
 		// Check for info command
