@@ -12,7 +12,7 @@ public sealed class AwardNominationService
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly Dictionary<string, Dictionary<string, string>> _nominations;
 
-    public AwardNominationService() : this(Path.Combine(AppContext.BaseDirectory, "data", "award-nominations.json")) { }
+    public AwardNominationService() : this(Path.Combine(Directory.GetCurrentDirectory(), "data", "award-nominations.json")) { }
 
     public AwardNominationService(string path)
     {
