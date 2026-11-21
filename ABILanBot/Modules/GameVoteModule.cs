@@ -15,7 +15,7 @@ public sealed class GameVoteModule : InteractionModuleBase<SocketInteractionCont
     [SlashCommand("stem", "La deltakerne velge neste spill")]
     public async Task VoteAsync(
         [Summary("timer", "Varighet i timer, 1–24")] int timer = 1,
-        [Summary("spill", "Valgfri kommaseparert liste med 2–20 spill")] string? spill = null)
+        [Summary("spill", "Valgfri kommaseparert liste med 2–10 spill")] string? spill = null)
     {
         try
         {
