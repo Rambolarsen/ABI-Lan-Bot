@@ -140,6 +140,7 @@ class Program
             var globalCommands = await _interactionService.AddModulesGloballyAsync(
                 deleteMissing: true, _globalModules);
             Console.WriteLine($"[Commands] Registered {globalCommands.Count} global commands.");
+            await LogCs2HealthAsync();
         }
         catch (Exception ex)
         {
