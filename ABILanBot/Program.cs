@@ -203,6 +203,7 @@ class Program
                     "• `/spill stem` - Stem på neste spill\n" +
                     "• `/award nominer` - Nominer til Årets gamer\n" +
                     "• `/award stem` - Stem på Årets gamer (arrangør)\n" +
+                    "• `/cs2 connect` - Adresse og spillpassord til CS2-serveren\n" +
                     "• `/cs2 preset` - Warmup eller competitive (arrangør)"
 			);
 		}

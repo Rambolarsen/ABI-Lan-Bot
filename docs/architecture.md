@@ -6,7 +6,7 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 
 - `ABILanBot/Program.cs` builds configuration from `appsettings.json` relative to the **process working directory**, creates services through `BotServiceRegistration`, starts `DiscordSocketClient` and `InteractionService`, and handles `!ping`, `!help`, and `!info`.
 - Discord login requires `Discord:Token`. `GameLobbyChannelName` is used by `TeamsModule`. See `ABILanBot/appsettings.example.json` for a non-secret example.
-- On Ready, `CommandRegistrationPlan` publishes only `LanFunModule` and `DadJokeModule` globally (server and bot DM contexts). `TeamsModule`, `Cs2Module`, and `FoodModule` remain guild-only using `Discord:GuildId`. Registration logs command counts and errors. Never publish RCON or admin commands globally.
+- On Ready, `CommandRegistrationPlan` publishes only `LanFunModule` and `DadJokeModule` globally (server and bot DM contexts). `TeamsModule`, `Cs2Module`, `FoodModule`, `GameVoteModule` and `AwardModule` remain guild-only using `Discord:GuildId`. Registration logs command counts and errors. Never publish RCON or admin commands globally.
 - The client requests the privileged `MessageContent` gateway intent when `Discord:EnableMessageContentIntent` is `true` (the default if the key is absent). Set `Discord:EnableMessageContentIntent` to `false` for a slash-only deployment to avoid requesting the intent. Text commands require this setting enabled and the intent enabled in Discord's Developer Portal; slash commands do not depend on that intent.
 
 ## Command and service boundaries
@@ -18,6 +18,8 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 | LAN fun commands | `Modules/LanFunModule.cs` | `/gamepick`, `/challenge`, `/lanbingo`; delegates generation to `LanFunService` |
 | LAN fun logic | `Services/LanFunService.cs` | Game selection, challenge selection and bingo content |
 | Food voting | `Modules/FoodModule.cs` and `Services/FoodPollService.cs` | Publishes a fixed list of verified Sandvika delivery menus via `/mat stem`; Discord owns votes, expiry and results |
+| Game voting | `Modules/GameVoteModule.cs` and `Services/LanPollService.cs` | Provides the LAN game poll via `/spill stem` |
+| LAN award | `Modules/AwardModule.cs` and `Services/AwardNominationService.cs` | Persists nominations and runs the Årets gamer poll |
 | Bot configuration | `Services/BotConfiguration.cs` | Reads and validates guild and message-content settings |
 | Dependency injection | `Services/BotServiceRegistration.cs` | Production/test service registrations and socket configuration |
 | Team allocation | `Services/TeamService.cs` | Shuffles connected users and distributes them round-robin |
