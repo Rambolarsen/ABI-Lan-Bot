@@ -9,7 +9,7 @@ public static class CommandRegistrationPlan
     public static IReadOnlyList<Type> GlobalModuleTypes { get; } =
         [typeof(LanFunModule), typeof(DadJokeModule)];
     public static IReadOnlyList<Type> GuildModuleTypes { get; } =
-        [typeof(TeamsModule), typeof(Cs2Module), typeof(FoodModule)];
+        [typeof(TeamsModule), typeof(Cs2Module), typeof(FoodModule), typeof(GameVoteModule), typeof(AwardModule)];
 
     public static async Task<(ModuleInfo[] Global, ModuleInfo[] Guild)> LoadAsync(
         InteractionService interactions, IServiceProvider services)

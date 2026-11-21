@@ -15,5 +15,16 @@ public static class StartupConfigurationValidator
 
         _ = BotConfiguration.GetGuildId(configuration);
         _ = BotConfiguration.IsMessageContentEnabled(configuration);
+
+        var cs2Host = configuration["Cs2:Host"];
+        var cs2Port = configuration["Cs2:Port"];
+        // CS2 is optional, but incomplete RCON endpoints should fail fast.
+        if (!string.IsNullOrWhiteSpace(cs2Host) || !string.IsNullOrWhiteSpace(cs2Port))
+        {
+            if (string.IsNullOrWhiteSpace(cs2Host) ||
+                cs2Host.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c is ';') ||
+                !int.TryParse(cs2Port, out var port) || port is < 1 or > 65535)
+                throw new InvalidOperationException("Cs2:Host and Cs2:Port must be a valid host and TCP port.");
+        }
     }
 }

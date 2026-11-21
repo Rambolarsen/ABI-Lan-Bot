@@ -140,12 +140,36 @@ class Program
             var globalCommands = await _interactionService.AddModulesGloballyAsync(
                 deleteMissing: true, _globalModules);
             Console.WriteLine($"[Commands] Registered {globalCommands.Count} global commands.");
+            await LogCs2HealthAsync();
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[Commands] Registration failed ({ex.GetType().Name}): {ex.Message}");
         }
 	}
+
+    private async Task LogCs2HealthAsync()
+    {
+        if (_configuration is null || _serviceProvider is null ||
+            string.IsNullOrWhiteSpace(_configuration["Cs2:Host"]))
+            return;
+
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("CS2_RCON_PASSWORD")))
+        {
+            Console.WriteLine("[Health] CS2 configured but RCON password not supplied; controls disabled.");
+            return;
+        }
+
+        try
+        {
+            await _serviceProvider.GetRequiredService<Cs2RconService>().GetStatusAsync();
+            Console.WriteLine("[Health] CS2 RCON authentication and status check OK.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[Health] CS2 RCON check failed: {ex.GetType().Name}. Use /cs2 status to diagnose.");
+        }
+    }
 
 	private async Task MessageReceivedAsync(SocketMessage message)
 	{
@@ -175,7 +199,11 @@ class Program
                     "• `/gamepick` - Randomly pick the next game\n" +
                     "• `/challenge` - Get a LAN party challenge\n" +
                     "• `/lanbingo` - Generate a LAN bingo card\n" +
-                    "• `/mat stem` - Stem på hvor vi bestiller middag fra"
+                    "• `/mat stem` - Stem på hvor vi bestiller middag fra\n" +
+                    "• `/spill stem` - Stem på neste spill\n" +
+                    "• `/award nominer` - Nominer til Årets gamer\n" +
+                    "• `/award stem` - Stem på Årets gamer (arrangør)\n" +
+                    "• `/cs2 preset` - Warmup eller competitive (arrangør)"
 			);
 		}
 		// Check for info command

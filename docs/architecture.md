@@ -24,7 +24,7 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 | Voice channels | `Services/VoiceChannelService.cs` | Finds/creates team channels, caches them in memory, deletes eligible cached channels |
 | Member moves | `Services/MemberService.cs` | Changes members' voice channels using Discord API |
 | External HTTP | `Services/DadJokeService.cs` | Calls icanhazdadjoke.com via an injected `HttpClient`; returns fallback text on failure |
-| CS2 interactions | `Modules/Cs2Module.cs` | `/cs2 connect` (public join details), `/cs2 status`, `/cs2 mode`, `/cs2 map`, `/cs2 restartmatch`; enforces `ManageGuild` on changes |
+| CS2 interactions | `Modules/Cs2Module.cs` | `/cs2 connect` (public join details), `/cs2 status`, `/cs2 mode`, `/cs2 preset`, `/cs2 map`, `/cs2 restartmatch`; enforces `ManageGuild` on changes |
 | RCON transport | `Services/Cs2RconService.cs` | Source RCON authentication, bounded packet handling, serialized administration, mode/map commands |
 | CS2 join details | `Services/Cs2ConnectInfo.cs` | Validated public game endpoint and optional join password, never the RCON secret |
 | Result model | `Entities/TeamResult.cs` | Holds team allocation success, error, and groups |
@@ -40,7 +40,7 @@ This is a compact, code-grounded map for a coding agent. Read the relevant sourc
 
 ## CS2 / Source RCON (implemented)
 
-- `Cs2Module` registers the guild-only `/cs2` group. `status` reports selected, non-sensitive fields extracted by `Cs2StatusParser` from the RCON response (including the root spawngroup map format used by CS2); `connect` reads public join details from configuration without RCON access; both are public within the guild. `mode`, `map` and `restartmatch` require Discord `ManageGuild`. Do not assume that status is an authorization check for administrative actions.
+- `Cs2Module` registers the guild-only `/cs2` group. `status` reports selected, non-sensitive fields extracted by `Cs2StatusParser` from the RCON response (including the root spawngroup map format used by CS2); `connect` reads public join details from configuration without RCON access; both are public within the guild. `mode`, `preset`, `map` and `restartmatch` require Discord `ManageGuild`. Do not assume that status is an authorization check for administrative actions.
 - `Cs2RconService` takes `Cs2:Host` and `Cs2:Port` from configuration and reads `CS2_RCON_PASSWORD` from the bot process environment. Never commit, return or log that password.
 - The client uses fresh TCP connections, packet size/output limits and timeouts, and serializes administrative actions with a semaphore. Map names are constrained to a lowercase alphanumeric/underscore pattern; do not replace this with an arbitrary console command endpoint.
 - Source RCON traffic is **unencrypted**. Limit host/network exposure. Sending a map or mode command is not proof the game server applied it, particularly when it disconnects during a map transition.
