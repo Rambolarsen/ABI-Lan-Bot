@@ -40,7 +40,7 @@ For troubleshooting, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -Fil
 
 ### LAN game voting and awards (guild slash commands)
 
-- **/spill stem** — start a native Discord poll for the next game. Optional `timer` (1–24 hours, default 1) and `spill` (2–20 comma-separated game names). Uses the same default games as `/gamepick`. Every voter gets one changeable vote.
+- **/spill stem** — start a native Discord poll for the next game. Optional `timer` (1–24 hours, default 1) and `spill` (2–10 comma-separated game names). Uses the same default games as `/gamepick`. Every voter gets one changeable vote.
 - **/award stem** — an organizer with **Manage Server** permission starts a native poll for a LAN award. Supply `pris`, e.g. `MVP`, and 2–10 comma-separated `nominerte`, e.g. `Alice, Bob, Charlie`; optional `timer` (1–24 hours). Collect nominations in the channel before launching the final poll; nominees cannot be added after posting.
 - Discord manages votes and expiry, so a bot restart does **not** erase the active polls. Poll creation is not automated into a tournament or ranking system; no separate state database is needed for these features.
 - Permissions: game voting is available to LAN members; award poll creation requires Manage Server. Both require **Create Polls** for the bot; neither is published to DMs.
