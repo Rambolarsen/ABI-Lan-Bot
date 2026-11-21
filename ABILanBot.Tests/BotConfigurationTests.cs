@@ -68,6 +68,19 @@ public sealed class BotConfigurationTests
     }
 
     [TestMethod]
+    public void StartupValidationRejectsIncompleteCs2Endpoint()
+    {
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            StartupConfigurationValidator.Validate(Config(
+                ("Discord:Token", "ci-test-token-not-real"),
+                ("Discord:GuildId", "123"), ("Cs2:Host", "oslo21.spillvert.no"))));
+        StartupConfigurationValidator.Validate(Config(
+            ("Discord:Token", "ci-test-token-not-real"),
+            ("Discord:GuildId", "123"), ("Cs2:Host", "oslo21.spillvert.no"),
+            ("Cs2:Port", "27020")));
+    }
+
+    [TestMethod]
     public void GuildIdMustBeConfigured()
     {
         Assert.AreEqual(1439887410107519087UL,
