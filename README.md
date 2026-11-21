@@ -140,7 +140,7 @@ commands being injected via Discord. No generic RCON console is exposed.
 
 ### Configuration
 
-`/cs2 connect` uses `Cs2:JoinHost`, `Cs2:JoinPort` and optional `Cs2:JoinPassword`. For this LAN the public join password is `bouvet`, intentionally displayed in the Discord channel. If `JoinHost`/`JoinPort` are omitted, the bot falls back to `Cs2:Host`/`Cs2:Port`; set the dedicated join endpoint if the game port differs from the RCON port. The console instruction sets the password before connecting:
+`/cs2 connect` uses `Cs2:JoinHost`, `Cs2:JoinPort` and `Cs2:JoinPassword`. For this LAN the required, publicly displayed game join password defaults to `bouvet` when the key is absent, so older local configurations still work. An explicitly empty or invalid password is rejected; an explicit valid password can override the default. This is **not** the administrative RCON password. If `JoinHost`/`JoinPort` are omitted, the bot falls back to `Cs2:Host`/`Cs2:Port`; set the dedicated join endpoint if the game port differs from the RCON port. The console instruction sets the password before connecting:
 
 ```text
 password bouvet; connect oslo21.spillvert.no:27020

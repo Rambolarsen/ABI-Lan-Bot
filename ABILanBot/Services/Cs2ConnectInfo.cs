@@ -17,20 +17,24 @@ public static class Cs2ConnectInfo
         @"\A[a-zA-Z0-9_-]{1,64}\z",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-    public static (string Address, string? Password) GetJoinInfo(IConfiguration config)
+    private const string DefaultJoinPassword = "bouvet";
+
+    public static (string Address, string Password) GetJoinInfo(IConfiguration config)
     {
         ArgumentNullException.ThrowIfNull(config);
         var host = config["Cs2:JoinHost"] ?? config["Cs2:Host"];
         var portText = config["Cs2:JoinPort"] ?? config["Cs2:Port"];
-        var password = config["Cs2:JoinPassword"];
+        // Bouvet-LAN requires a player password. Existing local appsettings.json
+        // files may predate JoinPassword, so preserve that requirement by default.
+        var password = config["Cs2:JoinPassword"] ?? DefaultJoinPassword;
 
         // Do not allow Discord Markdown, mentions, newline, or console-command
         // separators from configuration into the public response.
         if (string.IsNullOrWhiteSpace(host) || !HostPattern.IsMatch(host) ||
             !ushort.TryParse(portText, out var port) || port == 0 ||
-            (password is not null && password.Length > 0 && !PasswordPattern.IsMatch(password)))
+            !PasswordPattern.IsMatch(password))
             throw new InvalidOperationException("Invalid CS2 join configuration.");
 
-        return ($"{host}:{port}", string.IsNullOrEmpty(password) ? null : password);
+        return ($"{host}:{port}", password);
     }
 }
