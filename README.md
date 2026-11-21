@@ -41,8 +41,8 @@ For troubleshooting, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -Fil
 ### LAN game voting and awards (guild slash commands)
 
 - **/spill stem** — start a native Discord poll for the next game. Optional `timer` (1–24 hours, default 1) and `spill` (2–10 comma-separated game names). Uses the same default games as `/gamepick`. Every voter gets one changeable vote.
-- **/award nominer** — participants privately submit one nominee per award (`pris` and `deltaker`); repeating updates their own nomination. Nominees persist in the local `ABILanBot/data/award-nominations.json` file across bot restarts.
-- **/award stem** — an organizer with **Manage Server** permission creates the final native poll from stored nominees (2–10 unique names). Optionally override with `nominerte` (comma-separated names); `timer` is 1–24 hours. Nominees cannot be added to an already posted poll.
+- **/award nominer** — participants privately nominate one person for **Årets gamer** (`deltaker`). Repeating the command replaces their nomination. Nominees persist in the local `ABILanBot/data/award-nominations.json` file across bot restarts.
+- **/award stem** — an organizer with **Manage Server** permission creates the final **Årets gamer** poll from stored nominees (2–10 unique names). Optionally override with `nominerte` (comma-separated names); `timer` is 1–24 hours. Nominees cannot be added to an already posted poll. No award category needs to be entered.
 - Discord manages votes and expiry, so a bot restart does **not** erase active polls. Award nominations are additionally saved on local disk; keep the `data` folder when updating the checkout. No external database is needed.
 - Permissions: game voting is available to LAN members; award poll creation requires Manage Server. Both require **Create Polls** for the bot; neither is published to DMs.
 
