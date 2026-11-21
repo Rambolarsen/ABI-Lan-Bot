@@ -22,6 +22,7 @@ public static class BotServiceRegistration
         services.AddSingleton<LanFunService>();
         services.AddSingleton<FoodPollService>();
         services.AddSingleton<LanPollService>();
+        services.AddSingleton<AwardNominationService>();
         services.AddSingleton<Cs2RconService>();
         services.AddHttpClient<DadJokeService>();
         return services;
