@@ -26,16 +26,7 @@ public sealed class Cs2Module : InteractionModuleBase<SocketInteractionContext>
         {
             // Read-only join information. Do not connect to RCON or expose its
             // separate CS2_RCON_PASSWORD environment secret.
-            var join = Cs2ConnectInfo.GetJoinInfo(_config);
-            var command = $"password {join.Password}; connect {join.Address}";
-            var passwordLine = $"Passord: `{join.Password}`";
-
-            await RespondAsync(
-                $"🎮 **Bli med på Bouvet-LAN CS2**\n" +
-                $"Server: `{join.Address}`\n" +
-                $"{passwordLine}\n" +
-                "Åpne utviklerkonsollen i CS2 og lim inn:\n" +
-                $"```\n{command}\n```");
+            await RespondAsync(Cs2ConnectInfo.BuildDiscordHowTo(_config));
         }
         catch (InvalidOperationException)
         {

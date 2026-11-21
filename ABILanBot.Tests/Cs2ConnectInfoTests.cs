@@ -85,6 +85,35 @@ public sealed class Cs2ConnectInfoTests
     }
 
     [TestMethod]
+    public void DiscordHowToExplainsConsoleAndIncludesRequiredPassword()
+    {
+        var config = Config(
+            ("Cs2:Host", "oslo21.spillvert.no"),
+            ("Cs2:Port", "27020"));
+        var instructions = Cs2ConnectInfo.BuildDiscordHowTo(config);
+
+        StringAssert.Contains(instructions, "Slik kobler du til");
+        StringAssert.Contains(instructions, "Aktiver utviklerkonsoll");
+        StringAssert.Contains(instructions, "Start **Counter-Strike 2**");
+        StringAssert.Contains(instructions, "password bouvet; connect oslo21.spillvert.no:27020");
+        StringAssert.Contains(instructions, "Spillpassord: `bouvet`");
+        Assert.IsFalse(instructions.Contains("CS2_RCON_PASSWORD", StringComparison.Ordinal));
+        Assert.IsFalse(instructions.Contains("Ikke nødvendig", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void DiscordHowToRespectsConfiguredJoinEndpointAndPassword()
+    {
+        var config = Config(
+            ("Cs2:JoinHost", "cs2.example.org"),
+            ("Cs2:JoinPort", "27015"),
+            ("Cs2:JoinPassword", "friends"));
+        var instructions = Cs2ConnectInfo.BuildDiscordHowTo(config);
+
+        StringAssert.Contains(instructions, "password friends; connect cs2.example.org:27015");
+    }
+
+    [TestMethod]
     public void RejectsMissingAddress()
     {
         Assert.ThrowsExactly<InvalidOperationException>(() => Cs2ConnectInfo.GetJoinInfo(Config()));

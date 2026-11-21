@@ -19,6 +19,25 @@ public static class Cs2ConnectInfo
 
     private const string DefaultJoinPassword = "bouvet";
 
+    /// <summary>
+    /// Public, copyable player instructions for the LAN guild channel.
+    /// Never read or include the RCON administration password.
+    /// </summary>
+    public static string BuildDiscordHowTo(IConfiguration config)
+    {
+        var join = GetJoinInfo(config);
+        return $"🎮 **Bli med på Bouvet-LAN CS2**\n" +
+               $"Server: `{join.Address}`\n" +
+               $"Spillpassord: `{join.Password}`\n\n" +
+               "**Slik kobler du til:**\n" +
+               "1. Start **Counter-Strike 2** i Steam.\n" +
+               "2. Gå til **Innstillinger → Spill → Aktiver utviklerkonsoll (~)** og velg **Ja**.\n" +
+               "3. Åpne konsollen med tasten under **Esc** (ofte `§` på norsk tastatur). Du kan endre hurtigtasten under tastaturinnstillinger.\n" +
+               "4. Kopier hele kommandoen under, lim den inn i konsollen og trykk **Enter**:\n" +
+               $"```text\npassword {join.Password}; connect {join.Address}\n```\n" +
+               "5. Vent til du er inne på serveren. Sjekk adresse/port dersom tilkoblingen feiler.";
+    }
+
     public static (string Address, string Password) GetJoinInfo(IConfiguration config)
     {
         ArgumentNullException.ThrowIfNull(config);

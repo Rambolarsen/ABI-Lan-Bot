@@ -138,6 +138,23 @@ Commands:
 Map names are restricted to letters, numbers and underscores to prevent arbitrary
 commands being injected via Discord. No generic RCON console is exposed.
 
+### Hvordan koble til fra CS2?
+
+Alle på LAN-serveren i Discord kan skrive `/cs2 connect` for å få serveradresse, spillpassord og en ferdig kommando.
+
+1. Start **Counter-Strike 2** i Steam.
+2. Åpne **Innstillinger → Spill**, og sett **Aktiver utviklerkonsoll (~)** til **Ja**.
+3. Åpne konsollen med tasten under **Esc** (ofte `§` på norsk tastatur). Om dette ikke fungerer, sjekk eller endre bindingen for konsollen i tastaturinnstillingene.
+4. Lim inn kommandoen nedenfor og trykk **Enter**:
+
+```text
+password bouvet; connect oslo21.spillvert.no:27020
+```
+
+5. Vent på tilkoblingen. Hvis den feiler, kontroller at serveren kjører og at porten stemmer med spillserverens tilkoblingsport.
+
+Spillpassordet `bouvet` er offentlig for LAN-deltakerne, men **RCON-administratorpassordet er separat og skal aldri deles**.
+
 ### Configuration
 
 `/cs2 connect` uses `Cs2:JoinHost`, `Cs2:JoinPort` and `Cs2:JoinPassword`. For this LAN the required, publicly displayed game join password defaults to `bouvet` when the key is absent, so older local configurations still work. An explicitly empty or invalid password is rejected; an explicit valid password can override the default. This is **not** the administrative RCON password. If `JoinHost`/`JoinPort` are omitted, the bot falls back to `Cs2:Host`/`Cs2:Port`; set the dedicated join endpoint if the game port differs from the RCON port. The console instruction sets the password before connecting:
