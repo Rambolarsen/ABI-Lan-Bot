@@ -57,6 +57,36 @@ public sealed class Cs2Module : InteractionModuleBase<SocketInteractionContext>
         }
     }
 
+    [SlashCommand("preset", "Bruk en forhåndsdefinert CS2-oppsett (krever bekreftelse)")]
+    [RequireUserPermission(GuildPermission.ManageGuild)]
+    public async Task PresetAsync(
+        [Summary("preset", "Warmup eller Competitive")] Cs2MatchPreset preset,
+        [Summary("bekreft", "Bekreft at dette kan påvirke den aktive kampen")] bool bekreft = false)
+    {
+        if (!bekreft)
+        {
+            await RespondAsync(
+                "⚠️ Dette kan påvirke en aktiv kamp. Kjør kommandoen på nytt med `bekreft: true`.",
+                ephemeral: true);
+            return;
+        }
+
+        await DeferAsync(ephemeral: true);
+        try
+        {
+            await _rcon.ApplyPresetAsync(preset);
+            await FollowupAsync(
+                preset == Cs2MatchPreset.Warmup
+                    ? "🔥 Warmup-kommando sendt. Gjeldende kart beholdes."
+                    : "🏆 Competitive-oppsett sendt. Kartet lastes på nytt; sjekk `/cs2 status` etterpå.",
+                ephemeral: true);
+        }
+        catch (Exception ex)
+        {
+            await ReportErrorAsync(ex);
+        }
+    }
+
     [SlashCommand("map", "Bytt til et kart installert på serveren")]
     [RequireUserPermission(GuildPermission.ManageGuild)]
     public async Task MapAsync(string map)
